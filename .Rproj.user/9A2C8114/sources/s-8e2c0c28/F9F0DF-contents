@@ -1,0 +1,3 @@
+cd ~/R/x86_64-pc-linux-gnu-library/3.6/Repguide/bowtie_indeces
+conda activate bowtie
+bowtie-build --threads 10 /icgc/dkfzlsdf/analysis/C010/genomes/Hsapiens/GRCh38/star_fa/GRCh38.p12.genome.fa ./BSgenome.Hsapiens.UCSC.hg38

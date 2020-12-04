@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1606828952330.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "FA8CF292",
+    "lastKnownWriteTime" : 1606748816,
+    "last_content_update" : 1606832827180,
+    "path" : "~/c010-datasets/Internal/v/TestKnit.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "103,0",
+        "last_setup_crc32" : "",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1606836084502.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "859CBB4D",
+    "lastKnownWriteTime" : 1607090451,
+    "last_content_update" : 1607091095272,
+    "path" : "~/c010-datasets/Internal/RepGuide_ShinyApp/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+        "cursorPosition" : "209,27",
+        "docOutlineVisible" : "0",
+        "scrollLine" : "193"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
