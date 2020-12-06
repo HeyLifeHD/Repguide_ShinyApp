@@ -1,0 +1,20 @@
+output$Download <- downloadHandler(
+  filename = "Downloads.zip",
+  content = function(file){
+    withProgress(message = "Writing Files to Disk. Please wait...", {
+      temp <- setwd(tempdir())
+      on.exit(setwd(temp))
+      files <- c("mtcars.csv", "iris.csv")
+      
+      mtcars2 <- mtcars1() # Reading my reactive values in advance of launcing the future
+      iris2 <- iris1()
+      
+      future({
+        write.csv(mtcars2, "mtcars.csv")
+        write.csv(iris2, "iris.csv")
+        zip(zipfile = file, files = files)
+      }) 
+    })
+  }
+)
+}

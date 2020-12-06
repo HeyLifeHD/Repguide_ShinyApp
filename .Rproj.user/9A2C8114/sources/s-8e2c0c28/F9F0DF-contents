@@ -1,3 +1,6 @@
 cd ~/R/x86_64-pc-linux-gnu-library/3.6/Repguide/bowtie_indeces
 conda activate bowtie
 bowtie-build --threads 10 /icgc/dkfzlsdf/analysis/C010/genomes/Hsapiens/GRCh38/star_fa/GRCh38.p12.genome.fa ./BSgenome.Hsapiens.UCSC.hg38
+bowtie-build --threads 10 /icgc/dkfzlsdf/analysis/C010/genomes/Hsapiens/hg19/seq/hg19.fa ./BSgenome.Hsapiens.UCSC.hg19
+bowtie-build --threads 10 icgc/dkfzlsdf/analysis/C010/genomes/Mmusculus/mm10/seq/mm10.fa ./BSgenome.Mmusculus.UCSC.mm10
+

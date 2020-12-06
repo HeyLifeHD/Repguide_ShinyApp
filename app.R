@@ -5,8 +5,15 @@
 # the 'Run App' button above.
 
 #libraries
+if(!"shiny"%in%  installed.packages()) install.packages("shiny")
 library(shiny)
+if(!"Repguide"%in%  installed.packages()){
+    if (!requireNamespace("remotes", quietly = TRUE))
+    install.packages("remotes")
+    remotes::install_github(repo = 'tanaylab/repguide')
+}
 library(Repguide)
+if(!"data.table"%in%  installed.packages()) install.packages("data.table")
 library(data.table)
 
 # Define UI for application that draws a histogram
@@ -31,7 +38,7 @@ ui <- fluidPage(# Application title
                 "ref_genome",
                 label = h6("Select reference genome:"),
                 choices = list(
-                    #"Human GRCh38/hg38" = "hg38",
+                    "Human GRCh38/hg38" = "hg38",
                     "Human GRCh37/hg19" = "hg19",
                     "Mouse GRCh38/mm10" = "mm10"
                 ),
@@ -56,6 +63,8 @@ ui <- fluidPage(# Application title
                 max = 1,
                 value = 0.8
             ),
+            actionButton("action_target", "Submit target specifications"),
+            
             h4("Specify Repguide options for guide generation"),
             h5("Restrict guideRNA design to parts on consensus sequence"),
             textInput(
@@ -132,6 +141,16 @@ ui <- fluidPage(# Application title
                 max = 50,
                 value = 10
             ),
+            sliderInput(
+                "alpha_combinations",
+                label = h6(
+                    "Off-target score coefficient (large alpha penalizes combinations with high off-target score):"
+                ),
+                min = 0,
+                max = 100,
+                value = 10
+            )
+            
         ),
         #main panel
         mainPanel(
@@ -144,9 +163,9 @@ ui <- fluidPage(# Application title
             ),
             #plot first output: target repeats
             h1("Target exploration:"),
-            plotOutput("targets_repeats", height="500px"),
+            plotOutput("targets_repeats", height="600px"),
             h1("guideRNA design:"),
-            plotOutput("guides", height="1000px"),
+            plotOutput("guides", height="800px"),
             h1("Combinatorial optimization:"),
             plotOutput("combinations", height="1000px")
         )
@@ -166,11 +185,22 @@ server <- function(input, output) {
             print("No appropriate reference genome chosen")
         }
         #load packages
+        if(!paste0("org.", org, ".eg.db")%in%  installed.packages()) install.packages(paste0("org.", org, ".eg.db"))
         library(paste0("org.", org, ".eg.db"), character.only = TRUE)
     })
     
     #get appropriate reference genome
     BS_genome <- reactive({
+        if(!"BSgenome"%in%  installed.packages()) install.packages(paste0("BSgenome"))
+        if (input$ref_genome %in% c("hg38")) {
+            if(!"BSgenome.Hsapiens.UCSC.hg38" %in%  installed.packages()) install.packages("BSgenome.Hsapiens.UCSC.hg38")
+        } else if (input$ref_genome %in% c( "hg19")) {
+            if(!"BSgenome.Hsapiens.UCSC.hg19" %in%  installed.packages()) install.packages("BSgenome.Hsapiens.UCSC.hg19")
+        } else if (input$ref_genome %in% c( "mm10")) {
+            if(!"BSgenome.Mmusculus.UCSC.mm10" %in%  installed.packages()) install.packages("BSgenome.Mmusculus.UCSC.mm10")
+        } else{
+            print("No appropriate BSgenome object found")
+        }
         BSgenome::getBSgenome(genome = input$ref_genome)
     })
     
@@ -188,6 +218,7 @@ server <- function(input, output) {
             }))
         txdb <-
             colnames(txdb_objects[, txdb_objects[4, ] == input$ref_genome, drop = FALSE])
+        if(!txdb %in%  installed.packages()) install.packages(txdb)
         library(txdb, character.only = TRUE)
         return(txdb)
     })
@@ -248,7 +279,7 @@ server <- function(input, output) {
             blacklist = NULL,
             #input$blacklist,
             whitelist = whitelist_regions(),
-            n_cores = 5,
+            n_cores = 12,
             refdir = "",
             seed = 19
         )
@@ -282,6 +313,7 @@ server <- function(input, output) {
     })
     
     output$targets_repeats <- renderPlot({
+        req(gs2())
         #plot target repeat class
         plotTargets(gs2())
     })
@@ -327,6 +359,7 @@ server <- function(input, output) {
     })
     
     output$guides <- renderPlot({
+        req(gs3())
         #plot guides
         plotGuides(gs3())
         
@@ -342,12 +375,12 @@ server <- function(input, output) {
             # our guideSet
             #iterations = input$iterations,
             # number of greedy search iterations
-            #greedy = TRUE,
+            greedy = TRUE,
             # run greedy algorithm
-            #alpha = input$alpha,
+            alpha = input$alpha_combinations,
             # off-target score penalty coefficient
-            #max_guides = input$max_guides,
-            #force = TRUE
+            max_guides = input$max_guides,
+            force = TRUE
         )  # maximal number of guides to consider
         message("Check: end addCombinations")
         return(gs4_temp)
@@ -355,13 +388,13 @@ server <- function(input, output) {
     
     #plot guide combination
     output$combinations <- renderPlot({
+        req(gs4())
         #plot guides
         plotCombinations(gs4())
     })
     
     
 }
-
 
 
 # Run the application
