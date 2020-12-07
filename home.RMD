@@ -30,6 +30,8 @@ The basic workflow consists of exploring and selecting target sites, computing t
 
 <br>
 
+Before starting with the Repguide Workflow, you can explore the different Repeat-families/classes/names in the ***Repeat exploration*** tab. 
+<br>
 Once you selected the ***Guide design*** tab, you are only three clicks away from your final guideRNA set to perform genome wide targeting of repetetive DNA sequences. For each of the three steps (1.Target exploration; 2.Guide design; 3.Guide combination), publication ready figures are generated, which will help you select the optimal options for the follwing step in the workflow. Default options for a quick guideRNA design are already selected. 
 
 <br>
