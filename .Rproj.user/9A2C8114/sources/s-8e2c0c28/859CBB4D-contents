@@ -1,3 +1,5 @@
+
+
 #Joschka Hey
 #Shiny web application to run the R library Repguide
 
@@ -5,19 +7,32 @@
 # the 'Run App' button above.
 
 #libraries
-if(!"shiny"%in%  installed.packages()) install.packages("shiny")
+if (!"shiny" %in%  installed.packages())
+    install.packages("shiny")
 library(shiny)
-if(!"Repguide"%in%  installed.packages()){
+if (!"Repguide" %in%  installed.packages()) {
     if (!requireNamespace("remotes", quietly = TRUE))
-    install.packages("remotes")
+        install.packages("remotes")
     remotes::install_github(repo = 'tanaylab/repguide')
 }
-library(Repguide)
-if(!"data.table"%in%  installed.packages()) install.packages("data.table")
+library(shiny)
+if (!"Repguide" %in%  installed.packages()) {
+    if (!requireNamespace("remotes", quietly = TRUE))
+        install.packages("remotes")
+    remotes::install_github(repo = "andrewsali/shinycssloaders")
+}
+library(shinycssloaders)
+if (!"data.table" %in%  installed.packages())
+    install.packages("data.table")
 library(data.table)
+if (!"dplyr" %in%  installed.packages())
+    install.packages("dplyr")
+library(dplyr)
+
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(# Application title
+ui <- fluidPage(
+    # Application title
     #Logo of Repguide
     titlePanel(
         title = div(
@@ -29,6 +44,18 @@ ui <- fluidPage(# Application title
             "Repguide - design of guideRNAs for CRISPR/dCas9 targeting of repetitive DNA sequences"
         )
     ),
+    #here text still needs to be added
+    br(),
+    fluidRow(column(
+        1, align = "center",
+        img(
+            src = "schematic.png",
+            height = 350,
+            width = 1100
+        )
+    )),
+    br(),
+    
     
     # Sidebar input selection
     sidebarLayout(
@@ -36,7 +63,7 @@ ui <- fluidPage(# Application title
             h4("Specify Repguide options for Target exploration"),
             selectInput(
                 "ref_genome",
-                label = h6("Select reference genome:"),
+                label = h5("Select reference genome:"),
                 choices = list(
                     "Human GRCh38/hg38" = "hg38",
                     "Human GRCh37/hg19" = "hg19",
@@ -46,49 +73,67 @@ ui <- fluidPage(# Application title
             ),
             textInput(
                 "target_repeats",
-                label = h6("Select target class of repeats:"),
+                label = h5("Select target class of repeats:"),
                 value = NULL,
                 placeholder = "Enter repeat class..."
             ),
             textInput(
                 "whitelist_repeats",
-                label = h6("Select repeat class or classes to be whitelisted:"),
+                label = h5("Select repeat class or classes to be whitelisted:"),
                 value = NULL,
                 placeholder = "Enter repeat class ..."
             ),
+            h5(
+                "Blacklist promoter regions of essential genes (available for hg19/hg38):"
+            ),
+            checkboxInput("blacklist",
+                          label = h5(""),
+                          value = FALSE),
             sliderInput(
                 "gap_frequencies",
-                label = h6("Maximum gap frequency for target alignment:"),
+                label = h5("Maximum gap frequency for target alignment:"),
                 min = 0,
                 max = 1,
                 value = 0.8
             ),
-            actionButton("action_target", "Submit target specifications"),
-            
-            h4("Specify Repguide options for guide generation"),
+            actionButton("action_target", "Submit target specifications")
+        ),
+        #main panel
+        mainPanel(
+            #plot first output: target repeats
+            h1("Target exploration:"),
+            plotOutput("targets_repeats", height = "600px")
+        )
+    ),
+    br(),
+    br(),
+    
+    sidebarLayout(
+        sidebarPanel(
+            h5("Specify Repguide options for guide generation"),
             h5("Restrict guideRNA design to parts on consensus sequence"),
             textInput(
                 "start_position",
-                label = h6("Relative start position:"),
+                label = h5("Relative start position:"),
                 value = NULL,
                 placeholder = "Enter start position, e.g. 50"
             ),
             textInput(
                 "end_position",
-                label = h6("Relative end position:"),
+                label = h5("Relative end position:"),
                 value = NULL,
                 placeholder = "Enter end position, e.g. 600"
             ),
             sliderInput(
                 "guide_length",
-                label = h6("Basepair size of the guideRNAs:"),
+                label = h5("Basepair size of the guideRNAs:"),
                 min = 12,
                 max = 26,
                 value = 16
             ),
             sliderInput(
                 "n_mismatches",
-                label = h6(
+                label = h5(
                     "Maximal number of tolerated mismatches when assessing guideRNA binding targets:"
                 ),
                 min = 0,
@@ -97,37 +142,49 @@ ui <- fluidPage(# Application title
             ),
             textInput(
                 "five_prime_seq",
-                label = h6("Sequence requirement for 5' start of guideRNAs:"),
+                label = h5("Sequence requirement for 5' start of guideRNAs:"),
                 value = NULL,
                 placeholder = "Enter nucleotide, e.g. G for transcription from U6 promoter"
             ),
             sliderInput(
                 "gc_content",
-                label = h6("Allowed GC content for guidesRNAs:"),
+                label = h5("Allowed GC content for guidesRNAs:"),
                 min = 0,
                 max = 1,
                 value = c(0.4, 0.8)
             ),
             sliderInput(
                 "min_Son",
-                label = h6("Minimal on target score of guides:"),
+                label = h5("Minimal on target score of guides:"),
                 min = 0,
                 max = 100,
                 value = 50
             ),
             sliderInput(
                 "alpha",
-                label = h6(
+                label = h5(
                     "Off-target score coefficient (large alpha penalizes guides with high off-target score):"
                 ),
                 min = 0,
                 max = 100,
                 value = 0
             ),
+            actionButton("action_guide", "Submit guide specifications")
+        ),
+        #main panel
+        mainPanel(#plot first output: target repeats
+            h1("guideRNA design:"),
+            plotOutput("guides", height = "800px"))#%>% withSpinner(color="#0dc5c1"))
+    ),
+    br(),
+    br(),
+    
+    sidebarLayout(
+        sidebarPanel(
             h4("Specify Repguide options for guide combination"),
             sliderInput(
                 "max_guides",
-                label = h6(
+                label = h5(
                     "Maximum number of distinct guides to consider when calculating combinations:"
                 ),
                 min = 0,
@@ -136,40 +193,39 @@ ui <- fluidPage(# Application title
             ),
             sliderInput(
                 "iterations",
-                label = h6("Number of greedy search iterations:"),
+                label = h5("Number of greedy search iterations:"),
                 min = 0,
                 max = 50,
                 value = 10
             ),
             sliderInput(
                 "alpha_combinations",
-                label = h6(
+                label = h5(
                     "Off-target score coefficient (large alpha penalizes combinations with high off-target score):"
                 ),
                 min = 0,
                 max = 100,
                 value = 10
-            )
-            
+            ),
+            actionButton(
+                "action_combination",
+                "Submit guide combination specifications"
+            ),
+            br(),
+            br(),
+            downloadButton("downloadData", "Download Repguide output ")
         ),
+        
+        
+        
         #main panel
         mainPanel(
-            h1("Repguide workflow:"),
-            #Image ofRepguide workflow
-            img(
-                src = "schematic.png" ,
-                height = 280,
-                width = 800
-            ),
             #plot first output: target repeats
-            h1("Target exploration:"),
-            plotOutput("targets_repeats", height="600px"),
-            h1("guideRNA design:"),
-            plotOutput("guides", height="800px"),
             h1("Combinatorial optimization:"),
-            plotOutput("combinations", height="1000px")
+            plotOutput("combinations", height = "1000px")
         )
-    ))
+    )
+)
 
 
 
@@ -178,26 +234,33 @@ server <- function(input, output) {
     #select organism
     org <- reactive({
         if (input$ref_genome %in% c("hg38", "hg19")) {
-            return("Hs")
+            org <- "Hs"
         } else if (input$ref_genome %in% c("mm10", "mm9")) {
-            return("Mm")
+            org <- "Mm"
         } else{
             print("No appropriate reference genome chosen")
         }
         #load packages
-        if(!paste0("org.", org, ".eg.db")%in%  installed.packages()) install.packages(paste0("org.", org, ".eg.db"))
+        if (!paste0("org.", org, ".eg.db") %in%  installed.packages())
+            install.packages(paste0("org.", org, ".eg.db"))
         library(paste0("org.", org, ".eg.db"), character.only = TRUE)
+        org <- get(paste0("org.", org, ".eg.db"))
+        return(org)
     })
     
     #get appropriate reference genome
     BS_genome <- reactive({
-        if(!"BSgenome"%in%  installed.packages()) install.packages(paste0("BSgenome"))
+        if (!"BSgenome" %in%  installed.packages())
+            install.packages(paste0("BSgenome"))
         if (input$ref_genome %in% c("hg38")) {
-            if(!"BSgenome.Hsapiens.UCSC.hg38" %in%  installed.packages()) install.packages("BSgenome.Hsapiens.UCSC.hg38")
-        } else if (input$ref_genome %in% c( "hg19")) {
-            if(!"BSgenome.Hsapiens.UCSC.hg19" %in%  installed.packages()) install.packages("BSgenome.Hsapiens.UCSC.hg19")
-        } else if (input$ref_genome %in% c( "mm10")) {
-            if(!"BSgenome.Mmusculus.UCSC.mm10" %in%  installed.packages()) install.packages("BSgenome.Mmusculus.UCSC.mm10")
+            if (!"BSgenome.Hsapiens.UCSC.hg38" %in%  installed.packages())
+                install.packages("BSgenome.Hsapiens.UCSC.hg38")
+        } else if (input$ref_genome %in% c("hg19")) {
+            if (!"BSgenome.Hsapiens.UCSC.hg19" %in%  installed.packages())
+                install.packages("BSgenome.Hsapiens.UCSC.hg19")
+        } else if (input$ref_genome %in% c("mm10")) {
+            if (!"BSgenome.Mmusculus.UCSC.mm10" %in%  installed.packages())
+                install.packages("BSgenome.Mmusculus.UCSC.mm10")
         } else{
             print("No appropriate BSgenome object found")
         }
@@ -206,7 +269,7 @@ server <- function(input, output) {
     
     #get appropriate txdb file
     txdb <- reactive({
-        grep(
+        txdb_objects <- grep(
             pattern = "^TxDb",
             x = rownames(installed.packages()),
             value = TRUE
@@ -217,9 +280,11 @@ server <- function(input, output) {
                 x
             }))
         txdb <-
-            colnames(txdb_objects[, txdb_objects[4, ] == input$ref_genome, drop = FALSE])
-        if(!txdb %in%  installed.packages()) install.packages(txdb)
+            colnames(txdb_objects[, txdb_objects[4,] == input$ref_genome, drop = FALSE])
+        if (!txdb %in%  installed.packages())
+            install.packages(txdb)
         library(txdb, character.only = TRUE)
+        txdb <- get(txdb)
         return(txdb)
     })
     
@@ -244,9 +309,13 @@ server <- function(input, output) {
         )
     })
     
+    
+    
     #select whitelist repeats
     whitelist_regions <- reactive({
-        if (!is.null(input$whitelist_repeats)) {
+        if (is.null(input$whitelist_repeats)) {
+            whitelist_regions <- NULL
+        } else {
             repeats_dt <-
                 fread(repeats_path())
             repeats_dt <-
@@ -257,16 +326,62 @@ server <- function(input, output) {
                     end.field = "genoEnd",
                     keep.extra.columns = TRUE
                 )
-            whitelist_regions <-
-                repeats_dt[repeats_dt$repName %in% input$whitelist_repeats,]
-        } else{
-            whitelist_regions <- NULL
+            if (is.element(input$whitelist_repeats, repeats_dt$repName)) {
+                whitelist_regions <-
+                    repeats_dt[repeats_dt$repName %in% input$whitelist_repeats,]
+            } else {
+                # showNotification(
+                #     paste0(
+                #         input$whitelist_repeats,
+                #         " not found in guideSet annotation."
+                #     ),
+                #     type = "warning",
+                #     duration = 10
+                # )
+                whitelist_regions <- NULL
+            }
         }
         return(whitelist_regions)
     })
     
+    #select blacklist regions
+    blacklist_regions <- reactive({
+        if (isFALSE(input$blacklist)) {
+            return(NULL)
+        } else{
+            GENE <-  genes(txdb())
+            essentials <- fread(
+                file.path(
+                    getwd(),
+                    "reference_data",
+                    "blacklist",
+                    "core-essential-genes-sym_HGNCID.txt"
+                )
+            )
+            Promoter <-
+                promoters(GENE, upstream = 1500, downstream = 1500)
+            promoter_ids <-
+                mapIds(
+                    org(),
+                    keys = essentials$AAMP,
+                    keytype = "SYMBOL",
+                    column = "ENTREZID",
+                    multiVals = "first"
+                )
+            # select(
+            #     org(),
+            #     keys = essentials$AAMP,
+            #     columns = c("ENTREZID", "SYMBOL"),
+            #     keytype = "SYMBOL"
+            # )
+            essentials_promoter <-
+                Promoter[Promoter$gene_id %in% promoter_ids,]
+            return(essentials_promoter)
+        }
+    })
+    
     #create guideset
-    gs <- reactive({
+    gs <- eventReactive(input$action_target, {
         message("Check: start createGuideSet")
         gs_temp <- createGuideSet(
             genome = BS_genome(),
@@ -276,7 +391,7 @@ server <- function(input, output) {
             temp = tempdir(),
             # Directory for temporary files
             cis = fantom_path(),
-            blacklist = NULL,
+            blacklist = blacklist_regions(),
             #input$blacklist,
             whitelist = whitelist_regions(),
             n_cores = 12,
@@ -315,11 +430,13 @@ server <- function(input, output) {
     output$targets_repeats <- renderPlot({
         req(gs2())
         #plot target repeat class
-        plotTargets(gs2())
+        withProgress(message = "Prepare target sequences...", {
+            plotTargets(gs2())
+        })
     })
     
     #get consensus sequence for guide design
-    consensus_df <- reactive({
+    consensus_df <- eventReactive(input$action_guide, {
         message("Check: start consensus")
         consensus_df_temp <- data.frame(
             repname = c(input$target_repeats),
@@ -361,15 +478,16 @@ server <- function(input, output) {
     output$guides <- renderPlot({
         req(gs3())
         #plot guides
-        plotGuides(gs3())
+        withProgress(message = "Prepare guides...", {
+            plotGuides(gs3())
+        })
         
     })
     
     #calculate guide combinations
-    gs4 <-  reactive({
+    gs4 <-  eventReactive(input$action_combination, {
         req(gs3())
         message("Check: start addCombinations")
-        #browser()
         gs4_temp <- addCombinations(
             gs3(),
             # our guideSet
@@ -389,13 +507,138 @@ server <- function(input, output) {
     #plot guide combination
     output$combinations <- renderPlot({
         req(gs4())
-        #plot guides
-        plotCombinations(gs4())
+        withProgress(message = "Prepare guide combinations...", {
+            #plot guides
+            plotCombinations(gs4())
+        })
     })
     
+    #prepare download data
+    output$downloadData <- downloadHandler(
+        filename = "Repguide_Results.zip",
+        content = function(file) {
+            withProgress(message = "Writing Files to Disk. Please wait...", {
+                temp <- setwd(tempdir())
+                on.exit(setwd(temp))
+                files <- c("Repguide_output")
+                dir.create("Repguide_output")
+                dir.create(file.path("Repguide_output", "full_stats"))
+                if (length(gs4()@targets) > 0) {
+                    data.table::fwrite(
+                        as_tibble(gs4()@targets),
+                        file = paste0(
+                            'Repguide_output/full_stats/',
+                            'targets.txt'
+                        ),
+                        sep = '\t'
+                    )
+                }
+                # export kmers
+                library(tidyr)
+                library(ggplot2)
+                kmers <- as_tibble(gs4()@kmers)
+                if (length(kmers) > 0)
+                {
+                    data.table::fwrite(
+                        kmers,
+                        file = paste0('Repguide_output/full_stats/', 'kmers.txt'),
+                        sep = '\t'
+                    )
+                }
+                
+                # export combinations
+                if (length(gs4()@combinations) > 0)
+                {
+                    data.table::fwrite(
+                        unnest(gs4()@combinations),
+                        file = paste0(
+                            'Repguide_output/full_stats/',
+                            'combinations.txt'
+                        ),
+                        sep = '\t'
+                    )
+                }
+                
+                #export guides
+                combinations_subs <-
+                    gs4()@combinations %>% filter(best) %>% unnest
+                kmers <- as_tibble(gs4()@kmers)
+                kmers_subs <-
+                    inner_join(kmers, combinations_subs, by = 'kmer_id')
+                
+                kmers_by_nguides <-
+                    kmers_subs %>%
+                    group_by(n_guides) %>%
+                    do(data.frame = as_tibble(.))
+                
+                kmer_seqs_by_nguides <-
+                    kmers_subs %>%
+                    group_by(n_guides) %>%
+                    do(guide_seq = unique(DNAStringSet(
+                        structure(.$guide_seq, names = as.character(.$kmer_id)),
+                        use.names = TRUE
+                    )))
+                
+                for (i in kmers_by_nguides$n_guides)
+                {
+                    data.table::fwrite(
+                        kmers_by_nguides$data.frame[[i]],
+                        file = paste0("Repguide_output/", i, '_guides_binding.txt'),
+                        sep = '\t'
+                    )
+                    Biostrings::writeXStringSet(
+                        kmer_seqs_by_nguides$guide_seq[[i]],
+                        filepath = paste0(
+                            "Repguide_output/",
+                            i,
+                            '_guides_sequence.fasta'
+                        ),
+                        format = 'fasta'
+                    )
+                }
+                
+                # export target plots
+                i <- 1
+                dpi <- 300
+                gs_plot <- plotTargets(gs4())
+                gs_plot <- plotGuides(gs_plot)
+                gs_plot <- plotCombinations(gs_plot)
+                
+                for (p in gs_plot@plots$targets)
+                {
+                    fn <- paste0("Repguide_output/", 'targets', '_', i, '.png')
+                    ggsave(fn, p, device = 'png', dpi = dpi)
+                    i <- i + 1
+                }
+                
+                # export guide plots
+                i <- 1
+                for (p in gs_plot@plots$guides)
+                {
+                    fn <- paste0("Repguide_output/", 'guides', '_', i, '.png')
+                    ggsave(fn, p, device = 'png', dpi = dpi)
+                    i <- i + 1
+                }
+                
+                # export guide plots
+                i <- 1
+                for (p in gs_plot@plots$combinations)
+                {
+                    fn <- paste0("Repguide_output/",
+                                 'combinations',
+                                 '_',
+                                 i,
+                                 '.png')
+                    ggsave(fn, p, device = 'png', dpi = dpi)
+                    i <- i + 1
+                }
+                zip(zipfile = file, files = files)
+                
+            })
+        }
+    )
     
 }
-
 
 # Run the application
 shinyApp(ui = ui, server = server)
