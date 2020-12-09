@@ -47,8 +47,7 @@ ui <- fluidPage(
       type = "tabs",
       tabPanel("Home",
                mainPanel(
-                 h1(strong("Repguide")),
-                 
+                 h1(strong("Repguide")),align="center",
                  column(
                    8,
                    img(
@@ -143,7 +142,7 @@ ui <- fluidPage(
                 ),
                 textInput(
                   "whitelist_repeats",
-                  label = h5("Select repeat class or classes to be whitelisted:"),
+                  label = h5("Select repeat class or classes to be whitelisted (as comma seperated list):"),
                   value = NULL,
                   placeholder = "Enter repeat class ..."
                 ),
@@ -165,7 +164,10 @@ ui <- fluidPage(
               #main panel
               mainPanel(#plot first output: target repeats
                 #h3("Target exploration:"),
-                plotOutput("targets_repeats", height = "600px"))
+                plotOutput("targets_repeats", height = "600px"),
+                br(),
+                conditionalPanel(condition="input.action_target ==true",
+                  includeMarkdown("figure_legends/target_repeats.RMD")))
             ),
           ),
           tabPanel(
@@ -237,7 +239,11 @@ ui <- fluidPage(
               #main panel
               mainPanel(#plot first output: target repeats
                 #h3("guideRNA design:"),
-                plotOutput("guides", height = "800px"))#%>% withSpinner(color="#0dc5c1"))
+                plotOutput("guides", height = "800px"),
+                br(),
+                conditionalPanel(condition="input.action_guide ==true",
+                                 includeMarkdown("figure_legends/guides.RMD"))
+                )#%>% withSpinner(color="#0dc5c1"))
             ),
           ),
           tabPanel(
@@ -287,7 +293,10 @@ ui <- fluidPage(
               #main panel
               mainPanel(#plot first output: target repeats
                 #h3("Combinatorial optimization:"),
-                plotOutput("combinations", height = "1000px"))
+                plotOutput("combinations", height = "1000px"),
+                br(),
+                conditionalPanel(condition="input.action_combination ==true",
+                                 includeMarkdown("figure_legends/combinations.RMD")))
             )
           )
         )
@@ -309,6 +318,8 @@ server <- function(input, output) {
     )
   })
   repeats_invest <- reactive({
+    withProgress(message = "Load repeat data...", {
+      
     if (!"DT" %in%  installed.packages())
       install.packages("DT")
     library(DT)
@@ -333,13 +344,13 @@ server <- function(input, output) {
       )
     temp_repeats1 <- as.data.frame(temp_repeats)
     return(temp_repeats1)
+    })
   })
   
   
   output$repeats_table <-renderDataTable(repeats_invest(),
                                          options = list(
-                                           pageLength = 30,
-                                           initComplete = I("function(settings, json) {alert('Done.');}")
+                                           pageLength = 30
                                          )) 
   #   output$repeats_table <- renderDataTable(
   #     req(repeats_inspect()),
@@ -352,6 +363,8 @@ server <- function(input, output) {
   
   #select organism
   org <- reactive({
+    withProgress(message = "Load reference genome...", {
+      
     if (input$ref_genome %in% c("hg38", "hg19")) {
       org <- "Hs"
     } else if (input$ref_genome %in% c("mm10", "mm9")) {
@@ -365,10 +378,12 @@ server <- function(input, output) {
     library(paste0("org.", org, ".eg.db"), character.only = TRUE)
     org <- get(paste0("org.", org, ".eg.db"))
     return(org)
+    })
   })
   
   #get appropriate reference genome
   BS_genome <- reactive({
+    withProgress(message = "Load BS genome...", {
     if (!"BSgenome" %in%  installed.packages())
       install.packages(paste0("BSgenome"))
     if (input$ref_genome %in% c("hg38")) {
@@ -384,10 +399,13 @@ server <- function(input, output) {
       print("No appropriate BSgenome object found")
     }
     BSgenome::getBSgenome(genome = input$ref_genome)
+    })
   })
   
   #get appropriate txdb file
   txdb <- reactive({
+    withProgress(message = "Load TXDB...", {
+      
     txdb_objects <- grep(
       pattern = "^TxDb",
       x = rownames(installed.packages()),
@@ -405,6 +423,7 @@ server <- function(input, output) {
     library(txdb, character.only = TRUE)
     txdb <- get(txdb)
     return(txdb)
+    })
   })
   
   
@@ -432,6 +451,8 @@ server <- function(input, output) {
   
   #select whitelist repeats
   whitelist_regions <- reactive({
+    withProgress(message = "Load Whitelist regions...", {
+      
     if (is.null(input$whitelist_repeats)) {
       whitelist_regions <- NULL
     } else {
@@ -445,26 +466,31 @@ server <- function(input, output) {
           end.field = "genoEnd",
           keep.extra.columns = TRUE
         )
-      if (is.element(input$whitelist_repeats, repeats_dt$repName)) {
+      whitelist_list <- as.vector(unlist(strsplit(input$whitelist_repeats, ",",fixed=TRUE)))
+      whitelist_list <- gsub(" ", "", whitelist_list)
+      if (is.element(whitelist_list, repeats_dt$repName)) {
         whitelist_regions <-
-          repeats_dt[repeats_dt$repName %in% input$whitelist_repeats,]
+          repeats_dt[repeats_dt$repName %in% whitelist_list,]
       } else {
-        # showNotification(
-        #     paste0(
-        #         input$whitelist_repeats,
-        #         " not found in guideSet annotation."
-        #     ),
-        #     type = "warning",
-        #     duration = 10
-        # )
+        showNotification(
+            paste0(
+                input$whitelist_repeats,
+                " not found in guideSet annotation."
+            ),
+            type = "warning",
+            duration = 10
+        )
         whitelist_regions <- NULL
       }
     }
     return(whitelist_regions)
+    })
   })
   
   #select blacklist regions
   blacklist_regions <- reactive({
+    withProgress(message = "Load blacklist regions...", {
+      
     if (isFALSE(input$blacklist)) {
       return(NULL)
     } else{
@@ -497,6 +523,7 @@ server <- function(input, output) {
         Promoter[Promoter$gene_id %in% promoter_ids,]
       return(essentials_promoter)
     }
+    })
   })
   
   #create guideset

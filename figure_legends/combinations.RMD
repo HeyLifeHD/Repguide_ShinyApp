@@ -1,0 +1,18 @@
+---
+title: "Figure Legend: combinations"
+author: "Joschka Hey"
+date: "12/09/2020"
+output: html_document
+---
+
+<style>
+body {
+text-align: justify;
+}
+</style>
+
+
+The table in panel **a** summarizes the on- and off-targets per guide combination. We can see that the on-target binding score plateaus with increasing number of distinct guides (**a** and **b**), meaning the addition of further guideRNAs to the delivery construct would provide little extra benefit. Panel **c** visualizes the performance of the greedy algorithm and panel **d** shows on- vs off-target scores for all computed guide combinations. Closer inspection of predicted off-targets is shown in panels **e** and **f** which summarize off-target binding coverage by genomic feature and distance to nearest cis regulatory element, respectively. The target loci coverage per number of guides is shown in panel (**g**). Note how several loci are covered by more than one binding site. Panel **h** shows the predicted binding position along the consensus sequences (in 250 bp bins) by the number of guides. Full annotation of the figure is available in the documentation of the plotCombinations() function.
+
+
+

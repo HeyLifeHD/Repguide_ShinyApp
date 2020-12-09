@@ -1,0 +1,18 @@
+---
+title: "Figure Legend: action_guide"
+author: "Joschka Hey"
+date: "12/09/2020"
+output: html_document
+---
+
+<style>
+body {
+text-align: justify;
+}
+</style>
+
+
+We can see from the report that while most of the potential guides have the desired GC content, about half of them do not pass our minimal score requirements (**a**- **c**). Panel **d** shows the Sbind score distribution by the total number of mismatches of a guide’s genomic complement and **e** summarizes the frequency of off-targets by their basepair distance to the nearest cis regulatory element. The dotted red line indicates the conversion of basepair distances to the corresponding cis score (Scis) of an off-target site. Panels  **f ** and  **g ** show the clustering of guideRNAs by their target binding profile and selection of the best guide per cluster, respectively. For full annotation of the panels, we refer to the documentation page of the plotGuides() function.
+
+
+

@@ -1,0 +1,16 @@
+---
+title: "Figure Legend: targets_repeats"
+author: "Joschka Hey"
+date: "12/09/2020"
+output: html_document
+---
+
+<style>
+body {
+text-align: justify;
+}
+</style>
+
+
+The output generates general statistics on selected families and optional information that requires a multiple sequence alignment (see ?plotTargets for full annotation of the panels). As we can see from the figures, members of the LTR12C family are by far most prevalent and largest in size (panels **a** to **c**). Since we also calculated and added alignments, the output further visualizes the multiple sequence alignment (**d**), the density of CpG dinucleotides across it (**e**) and includes information on putative consensus transcription start sites (TSSs) (**f**). We can use this information for example, to optimize the design of our guideRNAs by targeting CpG dense regions close to the putative TSS.
+
