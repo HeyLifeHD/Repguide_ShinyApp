@@ -5,6 +5,12 @@
 # the 'Run App' button above.
 
 #libraries
+if (!"shinyWidgets" %in%  installed.packages())
+  install.packages(shinyWidgets)
+library(shinyWidgets)
+if (!"shinyBS" %in%  installed.packages())
+  install.packages("shinyBS")
+library(shinyBS)
 if (!"shiny" %in%  installed.packages())
   install.packages("shiny")
 library(shiny)
@@ -47,7 +53,8 @@ ui <- fluidPage(
       type = "tabs",
       tabPanel("Home",
                mainPanel(
-                 h1(strong("Repguide")),align="center",
+                 h1(strong("Repguide")),
+                 align = "center",
                  column(
                    8,
                    img(
@@ -99,8 +106,7 @@ ui <- fluidPage(
             )
           ),
           #main panel
-          mainPanel(
-            dataTableOutput("repeats_table"))
+          mainPanel(dataTableOutput("repeats_table"))
         )
       ),
       
@@ -121,53 +127,64 @@ ui <- fluidPage(
             "1.Target exploration",
             # Sidebar input selection
             sidebarLayout(
-              sidebarPanel(
+          sidebarPanel(
                 align = "left",
                 #h4("Specify Repguide options for Target exploration"),
-                selectInput(
-                  "ref_genome",
-                  label = h5("Select reference genome:"),
-                  choices = list(
-                    "Human GRCh38/hg38" = "hg38",
-                    "Human GRCh37/hg19" = "hg19",
-                    "Mouse GRCh38/mm10" = "mm10"
-                  ),
-                  selected = 2
-                ),
-                textInput(
+                splitLayout(cellWidths = c("90%", "10%"), 
+                            selectInput(
+                              "ref_genome",
+                              label = h5("Select reference genome:"),
+                              choices = list(
+                                "Human GRCh38/hg38" = "hg38",
+                                "Human GRCh37/hg19" = "hg19",
+                                "Mouse GRCh38/mm10" = "mm10"
+                              ),
+                              selected = 2
+                            ),  circleButton("ques_ref_genome", icon = icon("question-circle"), size="xs")),
+                
+                splitLayout(cellWidths = c("90%", "10%"), textInput(
                   "target_repeats",
-                  label = h5("Select target class of repeats:"),
+                  label = h5("Select target repeats:"),
                   value = NULL,
                   placeholder = "Enter repeat class..."
-                ),
-                textInput(
+                ), circleButton("ques_target_repeats", icon = icon("question-circle"), size="xs")),
+                
+                splitLayout(cellWidths = c("90%", "10%"), textInput(
                   "whitelist_repeats",
-                  label = h5("Select repeat class or classes to be whitelisted (as comma seperated list):"),
+                  label = h5(
+                    "Select whitelist repeats:"), 
                   value = NULL,
                   placeholder = "Enter repeat class ..."
-                ),
-                h5(
-                  "Blacklist promoter regions of essential genes (available for hg19/hg38):"
-                ),
+                ),circleButton("ques_whitelist_repeats", icon = icon("question-circle"), size="xs")),
+                
+                splitLayout(cellWidths = c("90%", "10%"),h5(
+                  "Blacklist promoter regions of essential genes:"
+                ), circleButton("ques_whitelist_blacklist", icon = icon("question-circle"), size="xs")),
                 checkboxInput("blacklist",
-                              label = h5(""),
-                              value = FALSE),
-                sliderInput(
+                                                                        label = h5(""),
+                                                                        value = FALSE),
+                
+                splitLayout(cellWidths = c("90%", "10%"),sliderInput(
                   "gap_frequencies",
                   label = h5("Maximum gap frequency for target alignment:"),
                   min = 0,
                   max = 1,
                   value = 0.8
-                ),
+                ),circleButton("ques_gap_frequencies", icon = icon("question-circle"), size="xs")),
+                
                 actionButton("action_target", "Submit target specifications")
               ),
               #main panel
-              mainPanel(#plot first output: target repeats
+              mainPanel(
+                #plot first output: target repeats
                 #h3("Target exploration:"),
                 plotOutput("targets_repeats", height = "600px"),
                 br(),
-                conditionalPanel(condition="input.action_target ==true",
-                  includeMarkdown("figure_legends/target_repeats.RMD")))
+                conditionalPanel(
+                  condition = "input.action_target ==true",
+                  includeMarkdown("figure_legends/target_repeats.RMD")
+                )
+              )
             ),
           ),
           tabPanel(
@@ -180,7 +197,7 @@ ui <- fluidPage(
                 textInput(
                   "start_position",
                   label = h5("Relative start position:"),
-                  value = NULL,
+                  value = "",
                   placeholder = "Enter start position, e.g. 50"
                 ),
                 textInput(
@@ -237,13 +254,14 @@ ui <- fluidPage(
                 actionButton("action_guide", "Submit guide specifications")
               ),
               #main panel
-              mainPanel(#plot first output: target repeats
+              mainPanel(
+                #plot first output: target repeats
                 #h3("guideRNA design:"),
                 plotOutput("guides", height = "800px"),
                 br(),
-                conditionalPanel(condition="input.action_guide ==true",
+                conditionalPanel(condition = "input.action_guide ==true",
                                  includeMarkdown("figure_legends/guides.RMD"))
-                )#%>% withSpinner(color="#0dc5c1"))
+              )#%>% withSpinner(color="#0dc5c1"))
             ),
           ),
           tabPanel(
@@ -291,12 +309,16 @@ ui <- fluidPage(
               
               
               #main panel
-              mainPanel(#plot first output: target repeats
+              mainPanel(
+                #plot first output: target repeats
                 #h3("Combinatorial optimization:"),
                 plotOutput("combinations", height = "1000px"),
                 br(),
-                conditionalPanel(condition="input.action_combination ==true",
-                                 includeMarkdown("figure_legends/combinations.RMD")))
+                conditionalPanel(
+                  condition = "input.action_combination ==true",
+                  includeMarkdown("figure_legends/combinations.RMD")
+                )
+              )
             )
           )
         )
@@ -308,6 +330,59 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  #observer events create guideset 
+  
+  observeEvent(input$ques_ref_genome, {
+    showModal(modalDialog(
+      title = "",
+      "Select reference organism genome for selection of target repeats.",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  observeEvent(input$ques_target_repeats, {
+    showModal(modalDialog(
+      title = "Help",
+      "Choose your target repeat family you want to create guides for. You can retrieve the full list of available repeat families in the tab \"Repeat exploratin\".
+      For example, LTRs originating from the human endogenous retrovirus 9 all conveniently share a common ‘LTR12’ prefix.fwhit",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  observeEvent(input$ques_target_repeats, {
+    showModal(modalDialog(
+      title = "Help",
+      "Choose your target repeat family you want to create guides for. You can retrieve the full list of available repeat families in the tab \"Repeat exploratin\".
+      For example, LTRs originating from the human endogenous retrovirus 9 all conveniently share a common ‘LTR12’ prefix.",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  observeEvent(input$ques_whitelist_repeats, {
+    showModal(modalDialog(
+      title = "Help",
+      "Choose one or several repeat families you want to whitlist from your analysis. Seperate multiple repeat families by \",\" Guides binding in whitelisted repeats will not account as off-targets.",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  observeEvent(input$ques_blacklist, {
+    showModal(modalDialog(
+      title = "Help",
+      "If you select \"blacklist\", promoters of essential genes will be blacklisted. 
+      By this guides binding in these regions will be removed from the set. Currently only available for hg19 and hg38",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  observeEvent(input$ques_gap_frequencies, {
+    showModal(modalDialog(
+      title = "Help",
+      "Select the maximum gap frequency of the repeat family multiple sequence alignment. Positions on alignment with a higher gap will be removed.",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
   #repeats
   repeats_path_invest <- reactive({
     file.path(
@@ -319,21 +394,22 @@ server <- function(input, output) {
   })
   repeats_invest <- reactive({
     withProgress(message = "Load repeat data...", {
+      if (!"DT" %in%  installed.packages())
+        install.packages("DT")
+      library(DT)
+      req(repeats_path_invest)
+      temp_repeats <- fread(repeats_path_invest())
+      temp_repeats <- temp_repeats[, c(
+        "genoName",
+        "genoStart",
+        "genoEnd",
+        "strand",
+        "repName",
+        "repClass",
+        "repFamily"
+      )]
       
-    if (!"DT" %in%  installed.packages())
-      install.packages("DT")
-    library(DT)
-    req(repeats_path_invest)
-    temp_repeats <- fread(repeats_path_invest())
-    temp_repeats <- temp_repeats[, c("genoName",
-                     "genoStart",
-                     "genoEnd",
-                     "strand",
-                     "repName",
-                     "repClass",
-                     "repFamily")]
-    
-    colnames(temp_repeats) <-c(
+      colnames(temp_repeats) <- c(
         "chromosome",
         "start",
         "end",
@@ -342,87 +418,83 @@ server <- function(input, output) {
         "Repeat Class",
         "Repeat Family"
       )
-    temp_repeats1 <- as.data.frame(temp_repeats)
-    return(temp_repeats1)
+      temp_repeats1 <- as.data.frame(temp_repeats)
+      return(temp_repeats1)
     })
   })
   
   
-  output$repeats_table <-renderDataTable(repeats_invest(),
-                                         options = list(
-                                           pageLength = 30
-                                         )) 
+  output$repeats_table <- renderDataTable(repeats_invest(),
+                                          options = list(pageLength = 30))
   #   output$repeats_table <- renderDataTable(
   #     req(repeats_inspect()),
   #     withProgress(message = "Preparae repeats table...", {
   #     as.data.frame(repeats_inspect()),
   #                                           options = list(pageLength = 5))
-  # 
+  #
   # })
-  # 
+  #
   
   #select organism
   org <- reactive({
     withProgress(message = "Load reference genome...", {
-      
-    if (input$ref_genome %in% c("hg38", "hg19")) {
-      org <- "Hs"
-    } else if (input$ref_genome %in% c("mm10", "mm9")) {
-      org <- "Mm"
-    } else{
-      print("No appropriate reference genome chosen")
-    }
-    #load packages
-    if (!paste0("org.", org, ".eg.db") %in%  installed.packages())
-      install.packages(paste0("org.", org, ".eg.db"))
-    library(paste0("org.", org, ".eg.db"), character.only = TRUE)
-    org <- get(paste0("org.", org, ".eg.db"))
-    return(org)
+      if (input$ref_genome %in% c("hg38", "hg19")) {
+        org <- "Hs"
+      } else if (input$ref_genome %in% c("mm10", "mm9")) {
+        org <- "Mm"
+      } else{
+        print("No appropriate reference genome chosen")
+      }
+      #load packages
+      if (!paste0("org.", org, ".eg.db") %in%  installed.packages())
+        install.packages(paste0("org.", org, ".eg.db"))
+      library(paste0("org.", org, ".eg.db"), character.only = TRUE)
+      org <- get(paste0("org.", org, ".eg.db"))
+      return(org)
     })
   })
   
   #get appropriate reference genome
   BS_genome <- reactive({
     withProgress(message = "Load BS genome...", {
-    if (!"BSgenome" %in%  installed.packages())
-      install.packages(paste0("BSgenome"))
-    if (input$ref_genome %in% c("hg38")) {
-      if (!"BSgenome.Hsapiens.UCSC.hg38" %in%  installed.packages())
-        install.packages("BSgenome.Hsapiens.UCSC.hg38")
-    } else if (input$ref_genome %in% c("hg19")) {
-      if (!"BSgenome.Hsapiens.UCSC.hg19" %in%  installed.packages())
-        install.packages("BSgenome.Hsapiens.UCSC.hg19")
-    } else if (input$ref_genome %in% c("mm10")) {
-      if (!"BSgenome.Mmusculus.UCSC.mm10" %in%  installed.packages())
-        install.packages("BSgenome.Mmusculus.UCSC.mm10")
-    } else{
-      print("No appropriate BSgenome object found")
-    }
-    BSgenome::getBSgenome(genome = input$ref_genome)
+      if (!"BSgenome" %in%  installed.packages())
+        install.packages(paste0("BSgenome"))
+      if (input$ref_genome %in% c("hg38")) {
+        if (!"BSgenome.Hsapiens.UCSC.hg38" %in%  installed.packages())
+          install.packages("BSgenome.Hsapiens.UCSC.hg38")
+      } else if (input$ref_genome %in% c("hg19")) {
+        if (!"BSgenome.Hsapiens.UCSC.hg19" %in%  installed.packages())
+          install.packages("BSgenome.Hsapiens.UCSC.hg19")
+      } else if (input$ref_genome %in% c("mm10")) {
+        if (!"BSgenome.Mmusculus.UCSC.mm10" %in%  installed.packages())
+          install.packages("BSgenome.Mmusculus.UCSC.mm10")
+      } else{
+        print("No appropriate BSgenome object found")
+      }
+      BSgenome::getBSgenome(genome = input$ref_genome)
     })
   })
   
   #get appropriate txdb file
   txdb <- reactive({
     withProgress(message = "Load TXDB...", {
-      
-    txdb_objects <- grep(
-      pattern = "^TxDb",
-      x = rownames(installed.packages()),
-      value = TRUE
-    )
-    txdb_objects <-
-      as.data.frame(sapply(txdb_objects, function(x) {
-        x <- unlist(strsplit(x, ".", fixed = TRUE))
-        x
-      }))
-    txdb <-
-      colnames(txdb_objects[, txdb_objects[4,] == input$ref_genome, drop = FALSE])
-    if (!txdb %in%  installed.packages())
-      install.packages(txdb)
-    library(txdb, character.only = TRUE)
-    txdb <- get(txdb)
-    return(txdb)
+      txdb_objects <- grep(
+        pattern = "^TxDb",
+        x = rownames(installed.packages()),
+        value = TRUE
+      )
+      txdb_objects <-
+        as.data.frame(sapply(txdb_objects, function(x) {
+          x <- unlist(strsplit(x, ".", fixed = TRUE))
+          x
+        }))
+      txdb <-
+        colnames(txdb_objects[, txdb_objects[4, ] == input$ref_genome, drop = FALSE])
+      if (!txdb %in%  installed.packages())
+        install.packages(txdb)
+      library(txdb, character.only = TRUE)
+      txdb <- get(txdb)
+      return(txdb)
     })
   })
   
@@ -452,77 +524,78 @@ server <- function(input, output) {
   #select whitelist repeats
   whitelist_regions <- reactive({
     withProgress(message = "Load Whitelist regions...", {
-      
-    if (is.null(input$whitelist_repeats)) {
-      whitelist_regions <- NULL
-    } else {
-      repeats_dt <-
-        fread(repeats_path())
-      repeats_dt <-
-        makeGRangesFromDataFrame(
-          as.data.frame(repeats_dt),
-          seqnames.field = "genoName",
-          start.field = "genoStart",
-          end.field = "genoEnd",
-          keep.extra.columns = TRUE
-        )
-      whitelist_list <- as.vector(unlist(strsplit(input$whitelist_repeats, ",",fixed=TRUE)))
-      whitelist_list <- gsub(" ", "", whitelist_list)
-      if (is.element(whitelist_list, repeats_dt$repName)) {
-        whitelist_regions <-
-          repeats_dt[repeats_dt$repName %in% whitelist_list,]
+      whitelist_repeats <- unlist(ifelse(input$whitelist_repeats=="", list(NULL),input$whitelist_repeats ))
+      whitelist_repeats <- if(is.null(whitelist_repeats)) {
+        return(NULL)
       } else {
-        showNotification(
+        repeats_dt <-
+          fread(repeats_path())
+        repeats_dt <-
+          makeGRangesFromDataFrame(
+            as.data.frame(repeats_dt),
+            seqnames.field = "genoName",
+            start.field = "genoStart",
+            end.field = "genoEnd",
+            keep.extra.columns = TRUE
+          )
+        whitelist_list <-
+          as.vector(unlist(strsplit(
+            whitelist_repeats, ",", fixed = TRUE
+          )))
+        whitelist_list <- gsub(" ", "", whitelist_list)
+        if (is.element(whitelist_list, repeats_dt$repName)) {
+            return(repeats_dt[repeats_dt$repName %in% whitelist_list, ])
+        }else {
+          showNotification(
             paste0(
-                input$whitelist_repeats,
-                " not found in guideSet annotation."
+              whitelist_repeats,
+              " not found in guideSet annotation."
             ),
             type = "warning",
             duration = 10
-        )
-        whitelist_regions <- NULL
+          )
+         return(NULL)
+        }
       }
-    }
-    return(whitelist_regions)
+      return(whitelist_repeats)
     })
   })
-  
+
   #select blacklist regions
   blacklist_regions <- reactive({
     withProgress(message = "Load blacklist regions...", {
-      
-    if (isFALSE(input$blacklist)) {
-      return(NULL)
-    } else{
-      GENE <-  genes(txdb())
-      essentials <- fread(
-        file.path(
-          getwd(),
-          "reference_data",
-          "blacklist",
-          "core-essential-genes-sym_HGNCID.txt"
+      if (isFALSE(input$blacklist)) {
+        return(NULL)
+      } else{
+        GENE <-  genes(txdb())
+        essentials <- fread(
+          file.path(
+            getwd(),
+            "reference_data",
+            "blacklist",
+            "core-essential-genes-sym_HGNCID.txt"
+          )
         )
-      )
-      Promoter <-
-        promoters(GENE, upstream = 1500, downstream = 1500)
-      promoter_ids <-
-        mapIds(
-          org(),
-          keys = essentials$AAMP,
-          keytype = "SYMBOL",
-          column = "ENTREZID",
-          multiVals = "first"
-        )
-      # select(
-      #     org(),
-      #     keys = essentials$AAMP,
-      #     columns = c("ENTREZID", "SYMBOL"),
-      #     keytype = "SYMBOL"
-      # )
-      essentials_promoter <-
-        Promoter[Promoter$gene_id %in% promoter_ids,]
-      return(essentials_promoter)
-    }
+        Promoter <-
+          promoters(GENE, upstream = 1500, downstream = 1500)
+        promoter_ids <-
+          mapIds(
+            org(),
+            keys = essentials$AAMP,
+            keytype = "SYMBOL",
+            column = "ENTREZID",
+            multiVals = "first"
+          )
+        # select(
+        #     org(),
+        #     keys = essentials$AAMP,
+        #     columns = c("ENTREZID", "SYMBOL"),
+        #     keytype = "SYMBOL"
+        # )
+        essentials_promoter <-
+          Promoter[Promoter$gene_id %in% promoter_ids, ]
+        return(essentials_promoter)
+      }
     })
   })
   
