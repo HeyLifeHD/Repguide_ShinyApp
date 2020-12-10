@@ -7,7 +7,7 @@ output: html_document
 
 <style>
 body {
-text-align: center;
+text-align: lef;
 }
 </style>
 

@@ -5,6 +5,12 @@
 # the 'Run App' button above.
 
 #libraries
+if (!"shinyWidgets" %in%  installed.packages())
+  install.packages(shinyWidgets)
+library(shinyWidgets)
+if (!"shinyBS" %in%  installed.packages())
+  install.packages("shinyBS")
+library(shinyBS)
 if (!"shiny" %in%  installed.packages())
   install.packages("shiny")
 library(shiny)
@@ -48,28 +54,27 @@ ui <- fluidPage(
       tabPanel("Home",
                mainPanel(
                  h1(strong("Repguide")),
-                 
-                 column(
-                   8,
+                 align = "left",
+                    br(),
                    img(
                      src = "logo.png",
                      height = 200,
                      width = 200,
                    ),
                    br(),
-                   br(),
+                   #br(),
                    includeMarkdown("home.Rmd"),
                    offset = 2,
                    br(),
-                   br(),
+                   #br(),
                    HTML("Repguide Visitor Counter:"),
                    br(),
                    HTML(
                      "<script type='text/javascript' src='//counter.websiteout.net/js/7/8/0/0'></script>"
                    ),
                    br(),
-                   br()
-                 )
+                   #br()
+                
                  ,
                  width = 11
                )),
@@ -100,8 +105,7 @@ ui <- fluidPage(
             )
           ),
           #main panel
-          mainPanel(
-            dataTableOutput("repeats_table"))
+          mainPanel(dataTableOutput("repeats_table"))
         )
       ),
       
@@ -125,47 +129,97 @@ ui <- fluidPage(
               sidebarPanel(
                 align = "left",
                 #h4("Specify Repguide options for Target exploration"),
-                selectInput(
-                  "ref_genome",
-                  label = h5("Select reference genome:"),
-                  choices = list(
-                    "Human GRCh38/hg38" = "hg38",
-                    "Human GRCh37/hg19" = "hg19",
-                    "Mouse GRCh38/mm10" = "mm10"
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  selectInput(
+                    "ref_genome",
+                    label = h5("Select reference genome:"),
+                    choices = list(
+                      "Human GRCh38/hg38" = "hg38",
+                      "Human GRCh37/hg19" = "hg19",
+                      "Mouse GRCh38/mm10" = "mm10"
+                    ),
+                    selected = 2
                   ),
-                  selected = 2
+                  circleButton(
+                    "ques_ref_genome",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
-                textInput(
-                  "target_repeats",
-                  label = h5("Select target class of repeats:"),
-                  value = NULL,
-                  placeholder = "Enter repeat class..."
+                
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  textInput(
+                    "target_repeats",
+                    label = h5("Select target repeats:"),
+                    value = NULL,
+                    placeholder = "Enter repeat class..."
+                  ),
+                  circleButton(
+                    "ques_target_repeats",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
-                textInput(
-                  "whitelist_repeats",
-                  label = h5("Select repeat class or classes to be whitelisted:"),
-                  value = NULL,
-                  placeholder = "Enter repeat class ..."
+                
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  textInput(
+                    "whitelist_repeats",
+                    label = h5("Select whitelist repeats:"),
+                    value = NULL,
+                    placeholder = "Enter repeat class ..."
+                  ),
+                  circleButton(
+                    "ques_whitelist_repeats",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
-                h5(
-                  "Blacklist promoter regions of essential genes (available for hg19/hg38):"
+                
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  h5("Blacklist promoter region of essential genes:"),
+                  circleButton(
+                    "ques_whitelist_blacklist",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
                 checkboxInput("blacklist",
                               label = h5(""),
                               value = FALSE),
-                sliderInput(
-                  "gap_frequencies",
-                  label = h5("Maximum gap frequency for target alignment:"),
-                  min = 0,
-                  max = 1,
-                  value = 0.8
+                
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
+                    "gap_frequencies",
+                    label = h5("Maximum gap frequency for target alignment:"),
+                    min = 0,
+                    max = 1,
+                    value = 0.8
+                  ),
+                  circleButton(
+                    "ques_gap_frequencies",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
+                
                 actionButton("action_target", "Submit target specifications")
               ),
               #main panel
-              mainPanel(#plot first output: target repeats
+              mainPanel(
+                #plot first output: target repeats
                 #h3("Target exploration:"),
-                plotOutput("targets_repeats", height = "600px"))
+                plotOutput("targets_repeats", height = "600px"),
+                br(),
+                conditionalPanel(
+                  condition = "input.action_target ==true",
+                  includeMarkdown("figure_legends/target_repeats.RMD")
+                )
+              )
             ),
           ),
           tabPanel(
@@ -173,12 +227,19 @@ ui <- fluidPage(
             sidebarLayout(
               sidebarPanel(
                 align = "left",
-                #h5("Specify Repguide options for guide generation"),
-                h5("Restrict guideRNA design to parts on consensus sequence"),
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  h5("Restrict guideRNA design to parts on consensus sequence"),
+                  circleButton(
+                    "ques_start_position",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
+                ),
                 textInput(
                   "start_position",
                   label = h5("Relative start position:"),
-                  value = NULL,
+                  value = "",
                   placeholder = "Enter start position, e.g. 50"
                 ),
                 textInput(
@@ -187,57 +248,106 @@ ui <- fluidPage(
                   value = NULL,
                   placeholder = "Enter end position, e.g. 600"
                 ),
-                sliderInput(
-                  "guide_length",
-                  label = h5("Basepair size of the guideRNAs:"),
-                  min = 12,
-                  max = 26,
-                  value = 16
-                ),
-                sliderInput(
-                  "n_mismatches",
-                  label = h5(
-                    "Maximal number of tolerated mismatches when assessing guideRNA binding targets:"
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
+                    "guide_length",
+                    label = h5("Length of guideRNAs:"),
+                    min = 12,
+                    max = 26,
+                    value = 16
                   ),
-                  min = 0,
-                  max = 3,
-                  value = 0
+                  circleButton(
+                    "ques_guide_length",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
-                textInput(
-                  "five_prime_seq",
-                  label = h5("Sequence requirement for 5' start of guideRNAs:"),
-                  value = NULL,
-                  placeholder = "Enter nucleotide, e.g. G for transcription from U6 promoter"
-                ),
-                sliderInput(
-                  "gc_content",
-                  label = h5("Allowed GC content for guidesRNAs:"),
-                  min = 0,
-                  max = 1,
-                  value = c(0.4, 0.8)
-                ),
-                sliderInput(
-                  "min_Son",
-                  label = h5("Minimal on target score of guides:"),
-                  min = 0,
-                  max = 100,
-                  value = 50
-                ),
-                sliderInput(
-                  "alpha",
-                  label = h5(
-                    "Off-target score coefficient (large alpha penalizes guides with high off-target score):"
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
+                    "n_mismatches",
+                    label = h5("Number of tolerated mismatches:"),
+                    min = 0,
+                    max = 3,
+                    value = 0
                   ),
-                  min = 0,
-                  max = 100,
-                  value = 0
+                  circleButton(
+                    "ques_n_mismatches",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
+                ),
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  textInput(
+                    "five_prime_seq",
+                    label = h5("Sequence requirement for 5' end:"),
+                    value = NULL,
+                    placeholder = "Enter nucleotide, e.g. G for transcription from U6 promoter"
+                  ),
+                  circleButton(
+                    "ques_five_prime_seq",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
+                ),
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
+                    "gc_content",
+                    label = h5(" GC content:"),
+                    min = 0,
+                    max = 1,
+                    value = c(0.4, 0.8)
+                  ),
+                  circleButton(
+                    "ques_gc_content",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
+                ),
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
+                    "min_Son",
+                    label = h5("Minimal on target score of guides:"),
+                    min = 0,
+                    max = 100,
+                    value = 50
+                  ),
+                  circleButton(
+                    "ques_min_Son",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
+                ),
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
+                    "alpha",
+                    label = h5("Off-target score coefficient:"),
+                    min = 0,
+                    max = 100,
+                    value = 0
+                  ),
+                  circleButton(
+                    "ques_alpha",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
                 actionButton("action_guide", "Submit guide specifications")
               ),
               #main panel
-              mainPanel(#plot first output: target repeats
+              mainPanel(
+                #plot first output: target repeats
                 #h3("guideRNA design:"),
-                plotOutput("guides", height = "800px"))#%>% withSpinner(color="#0dc5c1"))
+                plotOutput("guides", height = "800px"),
+                br(),
+                conditionalPanel(condition = "input.action_guide ==true",
+                                 includeMarkdown("figure_legends/guides.RMD"))
+              )
             ),
           ),
           tabPanel(
@@ -247,16 +357,25 @@ ui <- fluidPage(
             sidebarLayout(
               sidebarPanel(
                 align = "left",
-                #h4("Specify Repguide options for guide combination"),
-                sliderInput(
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
                   "max_guides",
                   label = h5(
-                    "Maximum number of distinct guides to consider when calculating combinations:"
+                    "Maximum number of guides:"
                   ),
                   min = 0,
                   max = 30,
                   value = 5
                 ),
+                circleButton(
+                  "ques_max_guides",
+                  icon = icon("question-circle"),
+                  size = "xs"
+                )
+                ),
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
                 sliderInput(
                   "iterations",
                   label = h5("Number of greedy search iterations:"),
@@ -264,14 +383,28 @@ ui <- fluidPage(
                   max = 50,
                   value = 10
                 ),
-                sliderInput(
+                circleButton(
+                  "ques_iterations",
+                  icon = icon("question-circle"),
+                  size = "xs"
+                )
+                ),
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
                   "alpha_combinations",
                   label = h5(
-                    "Off-target score coefficient (large alpha penalizes combinations with high off-target score):"
+                    "Off-target score coefficient:"
                   ),
                   min = 0,
                   max = 100,
                   value = 10
+                ),
+                circleButton(
+                  "ques_alpha_combinations",
+                  icon = icon("question-circle"),
+                  size = "xs"
+                )
                 ),
                 actionButton(
                   "action_combination",
@@ -285,9 +418,16 @@ ui <- fluidPage(
               
               
               #main panel
-              mainPanel(#plot first output: target repeats
+              mainPanel(
+                #plot first output: target repeats
                 #h3("Combinatorial optimization:"),
-                plotOutput("combinations", height = "1000px"))
+                plotOutput("combinations", height = "1000px"),
+                br(),
+                conditionalPanel(
+                  condition = "input.action_combination ==true",
+                  includeMarkdown("figure_legends/combinations.RMD")
+                )
+              )
             )
           )
         )
@@ -299,6 +439,70 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  #observer events for target exploration
+  observeEvent(input$ques_ref_genome, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Select reference organism genome for selection of target repeats.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_target_repeats, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Choose your target repeat family you want to create guides for. You can retrieve the full list of available repeat families in the tab \"Repeat exploratin\".
+      For example, LTRs originating from the human endogenous retrovirus 9 all conveniently share a common ‘LTR12’ prefix.fwhit",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_target_repeats, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Choose your target repeat family you want to create guides for. You can retrieve the full list of available repeat families in the tab \"Repeat exploratin\".
+      For example, LTRs originating from the human endogenous retrovirus 9 all conveniently share a common ‘LTR12’ prefix.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_whitelist_repeats, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Choose one or several repeat families you want to whitlist from your analysis. Seperate multiple repeat families by \",\" Guides binding in whitelisted repeats will not account as off-targets.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_blacklist, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "If you select \"blacklist\", promoters of essential genes will be blacklisted.
+      By this guides binding in these regions will be removed from the set. Currently only available for hg19 and hg38",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_gap_frequencies, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Select the maximum gap frequency of the repeat family multiple sequence alignment. Positions on alignment with a higher gap will be removed.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
   #repeats
   repeats_path_invest <- reactive({
     file.path(
@@ -309,20 +513,23 @@ server <- function(input, output) {
     )
   })
   repeats_invest <- reactive({
-    if (!"DT" %in%  installed.packages())
-      install.packages("DT")
-    library(DT)
-    req(repeats_path_invest)
-    temp_repeats <- fread(repeats_path_invest())
-    temp_repeats <- temp_repeats[, c("genoName",
-                     "genoStart",
-                     "genoEnd",
-                     "strand",
-                     "repName",
-                     "repClass",
-                     "repFamily")]
-    
-    colnames(temp_repeats) <-c(
+    withProgress(message = "Load repeat data...", {
+      if (!"DT" %in%  installed.packages())
+        install.packages("DT")
+      library(DT)
+      req(repeats_path_invest)
+      temp_repeats <- fread(repeats_path_invest())
+      temp_repeats <- temp_repeats[, c(
+        "genoName",
+        "genoStart",
+        "genoEnd",
+        "strand",
+        "repName",
+        "repClass",
+        "repFamily"
+      )]
+      
+      colnames(temp_repeats) <- c(
         "chromosome",
         "start",
         "end",
@@ -331,80 +538,84 @@ server <- function(input, output) {
         "Repeat Class",
         "Repeat Family"
       )
-    temp_repeats1 <- as.data.frame(temp_repeats)
-    return(temp_repeats1)
+      temp_repeats1 <- as.data.frame(temp_repeats)
+      return(temp_repeats1)
+    })
   })
   
   
-  output$repeats_table <-renderDataTable(repeats_invest(),
-                                         options = list(
-                                           pageLength = 30,
-                                           initComplete = I("function(settings, json) {alert('Done.');}")
-                                         )) 
+  output$repeats_table <- renderDataTable(repeats_invest(),
+                                          options = list(pageLength = 30))
   #   output$repeats_table <- renderDataTable(
   #     req(repeats_inspect()),
   #     withProgress(message = "Preparae repeats table...", {
   #     as.data.frame(repeats_inspect()),
   #                                           options = list(pageLength = 5))
-  # 
+  #
   # })
-  # 
+  #
   
   #select organism
   org <- reactive({
-    if (input$ref_genome %in% c("hg38", "hg19")) {
-      org <- "Hs"
-    } else if (input$ref_genome %in% c("mm10", "mm9")) {
-      org <- "Mm"
-    } else{
-      print("No appropriate reference genome chosen")
-    }
-    #load packages
-    if (!paste0("org.", org, ".eg.db") %in%  installed.packages())
-      install.packages(paste0("org.", org, ".eg.db"))
-    library(paste0("org.", org, ".eg.db"), character.only = TRUE)
-    org <- get(paste0("org.", org, ".eg.db"))
-    return(org)
+    withProgress(message = "Load reference genome...", {
+      if (input$ref_genome %in% c("hg38", "hg19")) {
+        org <- "Hs"
+      } else if (input$ref_genome %in% c("mm10", "mm9")) {
+        org <- "Mm"
+      } else{
+        print("No appropriate reference genome chosen")
+      }
+      #load packages
+      if (!paste0("org.", org, ".eg.db") %in%  installed.packages())
+        install.packages(paste0("org.", org, ".eg.db"))
+      library(paste0("org.", org, ".eg.db"), character.only = TRUE)
+      org <- get(paste0("org.", org, ".eg.db"))
+      return(org)
+    })
   })
   
   #get appropriate reference genome
   BS_genome <- reactive({
-    if (!"BSgenome" %in%  installed.packages())
-      install.packages(paste0("BSgenome"))
-    if (input$ref_genome %in% c("hg38")) {
-      if (!"BSgenome.Hsapiens.UCSC.hg38" %in%  installed.packages())
-        install.packages("BSgenome.Hsapiens.UCSC.hg38")
-    } else if (input$ref_genome %in% c("hg19")) {
-      if (!"BSgenome.Hsapiens.UCSC.hg19" %in%  installed.packages())
-        install.packages("BSgenome.Hsapiens.UCSC.hg19")
-    } else if (input$ref_genome %in% c("mm10")) {
-      if (!"BSgenome.Mmusculus.UCSC.mm10" %in%  installed.packages())
-        install.packages("BSgenome.Mmusculus.UCSC.mm10")
-    } else{
-      print("No appropriate BSgenome object found")
-    }
-    BSgenome::getBSgenome(genome = input$ref_genome)
+    withProgress(message = "Load BS genome...", {
+      if (!"BSgenome" %in%  installed.packages())
+        install.packages(paste0("BSgenome"))
+      if (input$ref_genome %in% c("hg38")) {
+        if (!"BSgenome.Hsapiens.UCSC.hg38" %in%  installed.packages())
+          install.packages("BSgenome.Hsapiens.UCSC.hg38")
+      } else if (input$ref_genome %in% c("hg19")) {
+        if (!"BSgenome.Hsapiens.UCSC.hg19" %in%  installed.packages())
+          install.packages("BSgenome.Hsapiens.UCSC.hg19")
+      } else if (input$ref_genome %in% c("mm10")) {
+        if (!"BSgenome.Mmusculus.UCSC.mm10" %in%  installed.packages())
+          install.packages("BSgenome.Mmusculus.UCSC.mm10")
+      } else{
+        print("No appropriate BSgenome object found")
+      }
+      BSgenome::getBSgenome(genome = input$ref_genome)
+    })
   })
   
   #get appropriate txdb file
   txdb <- reactive({
-    txdb_objects <- grep(
-      pattern = "^TxDb",
-      x = rownames(installed.packages()),
-      value = TRUE
-    )
-    txdb_objects <-
-      as.data.frame(sapply(txdb_objects, function(x) {
-        x <- unlist(strsplit(x, ".", fixed = TRUE))
-        x
-      }))
-    txdb <-
-      colnames(txdb_objects[, txdb_objects[4,] == input$ref_genome, drop = FALSE])
-    if (!txdb %in%  installed.packages())
-      install.packages(txdb)
-    library(txdb, character.only = TRUE)
-    txdb <- get(txdb)
-    return(txdb)
+    withProgress(message = "Load TXDB...", {
+      txdb_objects <- grep(
+        pattern = "^TxDb",
+        x = rownames(installed.packages()),
+        value = TRUE
+      )
+      txdb_objects <-
+        as.data.frame(sapply(txdb_objects, function(x) {
+          x <- unlist(strsplit(x, ".", fixed = TRUE))
+          x
+        }))
+      txdb <-
+        colnames(txdb_objects[, txdb_objects[4, ] == input$ref_genome, drop = FALSE])
+      if (!txdb %in%  installed.packages())
+        install.packages(txdb)
+      library(txdb, character.only = TRUE)
+      txdb <- get(txdb)
+      return(txdb)
+    })
   })
   
   
@@ -432,71 +643,83 @@ server <- function(input, output) {
   
   #select whitelist repeats
   whitelist_regions <- reactive({
-    if (is.null(input$whitelist_repeats)) {
-      whitelist_regions <- NULL
-    } else {
-      repeats_dt <-
-        fread(repeats_path())
-      repeats_dt <-
-        makeGRangesFromDataFrame(
-          as.data.frame(repeats_dt),
-          seqnames.field = "genoName",
-          start.field = "genoStart",
-          end.field = "genoEnd",
-          keep.extra.columns = TRUE
-        )
-      if (is.element(input$whitelist_repeats, repeats_dt$repName)) {
-        whitelist_regions <-
-          repeats_dt[repeats_dt$repName %in% input$whitelist_repeats,]
+    withProgress(message = "Load Whitelist regions...", {
+      whitelist_repeats <-
+        unlist(ifelse(
+          input$whitelist_repeats == "",
+          list(NULL),
+          input$whitelist_repeats
+        ))
+      whitelist_repeats <- if (is.null(whitelist_repeats)) {
+        return(NULL)
       } else {
-        # showNotification(
-        #     paste0(
-        #         input$whitelist_repeats,
-        #         " not found in guideSet annotation."
-        #     ),
-        #     type = "warning",
-        #     duration = 10
-        # )
-        whitelist_regions <- NULL
+        repeats_dt <-
+          fread(repeats_path())
+        repeats_dt <-
+          makeGRangesFromDataFrame(
+            as.data.frame(repeats_dt),
+            seqnames.field = "genoName",
+            start.field = "genoStart",
+            end.field = "genoEnd",
+            keep.extra.columns = TRUE
+          )
+        whitelist_list <-
+          as.vector(unlist(strsplit(whitelist_repeats, ",", fixed = TRUE)))
+        whitelist_list <- gsub(" ", "", whitelist_list)
+        if (is.element(whitelist_list, repeats_dt$repName)) {
+          return(repeats_dt[repeats_dt$repName %in% whitelist_list, ])
+        } else {
+          showNotification(
+            paste0(
+              whitelist_repeats,
+              " not found in guideSet annotation."
+            ),
+            type = "warning",
+            duration = 10
+          )
+          return(NULL)
+        }
       }
-    }
-    return(whitelist_regions)
+      return(whitelist_repeats)
+    })
   })
   
   #select blacklist regions
   blacklist_regions <- reactive({
-    if (isFALSE(input$blacklist)) {
-      return(NULL)
-    } else{
-      GENE <-  genes(txdb())
-      essentials <- fread(
-        file.path(
-          getwd(),
-          "reference_data",
-          "blacklist",
-          "core-essential-genes-sym_HGNCID.txt"
+    withProgress(message = "Load blacklist regions...", {
+      if (isFALSE(input$blacklist)) {
+        return(NULL)
+      } else{
+        GENE <-  genes(txdb())
+        essentials <- fread(
+          file.path(
+            getwd(),
+            "reference_data",
+            "blacklist",
+            "core-essential-genes-sym_HGNCID.txt"
+          )
         )
-      )
-      Promoter <-
-        promoters(GENE, upstream = 1500, downstream = 1500)
-      promoter_ids <-
-        mapIds(
-          org(),
-          keys = essentials$AAMP,
-          keytype = "SYMBOL",
-          column = "ENTREZID",
-          multiVals = "first"
-        )
-      # select(
-      #     org(),
-      #     keys = essentials$AAMP,
-      #     columns = c("ENTREZID", "SYMBOL"),
-      #     keytype = "SYMBOL"
-      # )
-      essentials_promoter <-
-        Promoter[Promoter$gene_id %in% promoter_ids,]
-      return(essentials_promoter)
-    }
+        Promoter <-
+          promoters(GENE, upstream = 1500, downstream = 1500)
+        promoter_ids <-
+          mapIds(
+            org(),
+            keys = essentials$AAMP,
+            keytype = "SYMBOL",
+            column = "ENTREZID",
+            multiVals = "first"
+          )
+        # select(
+        #     org(),
+        #     keys = essentials$AAMP,
+        #     columns = c("ENTREZID", "SYMBOL"),
+        #     keytype = "SYMBOL"
+        # )
+        essentials_promoter <-
+          Promoter[Promoter$gene_id %in% promoter_ids, ]
+        return(essentials_promoter)
+      }
+    })
   })
   
   #create guideset
@@ -560,6 +783,82 @@ server <- function(input, output) {
     })
   })
   
+  #observer events for create guides
+  observeEvent(input$ques_start_position, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Select the start and end position on the consensus model of your target repeats. Guides binding outside the consensus range will be scored neutrally.
+      This allows you to select guides that have a preferential binding in certain areas of the repeat, e.g. upstream of potential promoters, indicated by enrichment
+      of Cis regulatory elements.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_n_mismatches, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Maximal number of tolerated mismatches when assessing guideRNA binding targets.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_min_Son, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Minimal on target score of guides.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_guide_length, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Basepair size of the guideRNAs. guideRNA lenght between 12 and 26 are allowed",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_gc_content, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Select range of GC content for guideRNAs. Will blacklist guides with GC content outside the range.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_alpha, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Select the start and end position on the consensus model of your target repeats. Guides binding outside the consensus range will be scored neutrally.
+      This allows you to select guides that have a preferential binding in certain areas of the repeat, e.g. upstream of potential promoters, indicated by enrichment
+      of Cis regulatory elements.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_five_prime_seq, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Sequence requirement for 5' start of guideRNAs, e.g. G nucleotide for transcription from U6 promoter.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  
   #get consensus sequence for guide design
   consensus_df <- eventReactive(input$action_guide, {
     message("Check: start consensus")
@@ -611,6 +910,55 @@ server <- function(input, output) {
     
   })
   
+  
+  #observer events for add combinations
+  observeEvent(input$ques_alpha_combinations, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Select the start and end position on the consensus model of your target repeats. Guides binding outside the consensus range will be scored neutrally.
+      This allows you to select guides that have a preferential binding in certain areas of the repeat, e.g. upstream of potential promoters, indicated by enrichment
+      of Cis regulatory elements.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_alpha_combinations, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Numeric. Off-target score coefficient. Large alpha penalizes combinations with high off-target score while alpha = 0 
+        ignores off-targets and picks combinations with highest on-target binding.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_max_guides, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Maximum number of distinct guides to consider when calculating combinations. Do not use a higher number than experimentally feasible.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  observeEvent(input$ques_iterations, {
+    showModal(
+      modalDialog(
+        title = "Help",
+        "Selecting the optimal set of guideRNAs for maximal on- and minimal off-targeting is not trivial. 
+        Repguide first computes the binding profiles of all possible combinations of previously selected guide representatives, 
+        i.e. the best guides per cluster. The best combination then serves as seed to initialize a greedy algorithm to further optimize the set.",
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  
+  
   #calculate guide combinations
   gs4 <-  eventReactive(input$action_combination, {
     req(gs3())
@@ -619,7 +967,7 @@ server <- function(input, output) {
       gs4_temp <- addCombinations(
         gs3(),
         # our guideSet
-        #iterations = input$iterations,
+        iterations = input$iterations,
         # number of greedy search iterations
         greedy = TRUE,
         # run greedy algorithm
