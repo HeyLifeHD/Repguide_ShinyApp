@@ -1,0 +1,42 @@
+---
+title: "Home"
+author: "Joschka Hey"
+date: "12/07/2020"
+output: html_document
+---
+
+<style>
+body {
+  text-align: lef;
+}
+</style>
+
+
+### Contributions
+**The Repguide web tool has been developed by:**
+
+Division of Cancer Epigenomics, German Cancer Research Center (DKFZ) Heidelberg, Germany 
+<br>
+
+[Cancer Epigenomics](https://www.dkfz.de/en/CanEpi/index.php)
+
+Contact: 
+[Joschka Hey](mailto:j.hey@dkfz.de)
+
+[<img src="www/dkfz_logo.png" alt="DKFZ Logo" width="80%" />](https://www.dkfz.de/en)
+
+<br>
+
+**The Repguide R-package has been developed by:**
+
+Division of Epigenomics and Evolution, Weizmann Instittute of Science (WIS), Rehovot Israel 
+<br>
+
+[Epigenomics and Evolution](http://compgenomics.weizmann.ac.il/tanay/)
+
+Contact:
+[David Brocks](mailto:davidbrocks87@googlemail.com)
+
+[<img src="www/wis_logo.png" alt="WIS Logo" width="80%" />](https://www.weizmann.ac.il/)
+
+

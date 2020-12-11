@@ -51,33 +51,35 @@ ui <- fluidPage(
     windowTitle = "Repguide",
     tabsetPanel(
       type = "tabs",
-      tabPanel("Home",
-               mainPanel(
-                 h1(strong("Repguide")),
-                 align = "left",
-                    br(),
-                   img(
-                     src = "logo.png",
-                     height = 200,
-                     width = 200,
-                   ),
-                   br(),
-                   #br(),
-                   includeMarkdown("home.Rmd"),
-                   offset = 2,
-                   br(),
-                   #br(),
-                   HTML("Repguide Visitor Counter:"),
-                   br(),
-                   HTML(
-                     "<script type='text/javascript' src='//counter.websiteout.net/js/7/8/0/0'></script>"
-                   ),
-                   br(),
-                   #br()
-                
-                 ,
-                 width = 11
-               )),
+      tabPanel(
+        "Home",
+        titlePanel(title = div(
+          img(
+            src = "logo.png",
+            height = 100,
+            width = 100
+          ),
+          "Repguide",
+          align = "left"
+        )),
+        mainPanel(
+          fluidRow(column(8, includeMarkdown("home.Rmd")),
+                   column(1),
+                   column(3, includeMarkdown(
+                     "contributions.RMD"
+                   ))),
+          
+          offset = 2,
+          br(),
+          HTML("Repguide Visitor Counter:"),
+          br(),
+          HTML(
+            "<script type='text/javascript' src='//counter.websiteout.net/js/7/8/0/0'></script>"
+          ),
+          br(),
+          awidth = 11
+        )
+      ),
       
       tabPanel(
         "Repeat exploration",
@@ -360,51 +362,47 @@ ui <- fluidPage(
                 splitLayout(
                   cellWidths = c("95%", "5%"),
                   sliderInput(
-                  "max_guides",
-                  label = h5(
-                    "Maximum number of guides:"
+                    "max_guides",
+                    label = h5("Maximum number of guides:"),
+                    min = 0,
+                    max = 30,
+                    value = 5
                   ),
-                  min = 0,
-                  max = 30,
-                  value = 5
-                ),
-                circleButton(
-                  "ques_max_guides",
-                  icon = icon("question-circle"),
-                  size = "xs"
-                )
-                ),
-                splitLayout(
-                  cellWidths = c("95%", "5%"),
-                sliderInput(
-                  "iterations",
-                  label = h5("Number of greedy search iterations:"),
-                  min = 0,
-                  max = 50,
-                  value = 10
-                ),
-                circleButton(
-                  "ques_iterations",
-                  icon = icon("question-circle"),
-                  size = "xs"
-                )
+                  circleButton(
+                    "ques_max_guides",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
                 splitLayout(
                   cellWidths = c("95%", "5%"),
                   sliderInput(
-                  "alpha_combinations",
-                  label = h5(
-                    "Off-target score coefficient:"
+                    "iterations",
+                    label = h5("Number of greedy search iterations:"),
+                    min = 0,
+                    max = 50,
+                    value = 10
                   ),
-                  min = 0,
-                  max = 100,
-                  value = 10
+                  circleButton(
+                    "ques_iterations",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
-                circleButton(
-                  "ques_alpha_combinations",
-                  icon = icon("question-circle"),
-                  size = "xs"
-                )
+                splitLayout(
+                  cellWidths = c("95%", "5%"),
+                  sliderInput(
+                    "alpha_combinations",
+                    label = h5("Off-target score coefficient:"),
+                    min = 0,
+                    max = 100,
+                    value = 10
+                  ),
+                  circleButton(
+                    "ques_alpha_combinations",
+                    icon = icon("question-circle"),
+                    size = "xs"
+                  )
                 ),
                 actionButton(
                   "action_combination",
@@ -609,7 +607,7 @@ server <- function(input, output) {
           x
         }))
       txdb <-
-        colnames(txdb_objects[, txdb_objects[4, ] == input$ref_genome, drop = FALSE])
+        colnames(txdb_objects[, txdb_objects[4,] == input$ref_genome, drop = FALSE])
       if (!txdb %in%  installed.packages())
         install.packages(txdb)
       library(txdb, character.only = TRUE)
@@ -667,7 +665,7 @@ server <- function(input, output) {
           as.vector(unlist(strsplit(whitelist_repeats, ",", fixed = TRUE)))
         whitelist_list <- gsub(" ", "", whitelist_list)
         if (is.element(whitelist_list, repeats_dt$repName)) {
-          return(repeats_dt[repeats_dt$repName %in% whitelist_list, ])
+          return(repeats_dt[repeats_dt$repName %in% whitelist_list,])
         } else {
           showNotification(
             paste0(
@@ -716,7 +714,7 @@ server <- function(input, output) {
         #     keytype = "SYMBOL"
         # )
         essentials_promoter <-
-          Promoter[Promoter$gene_id %in% promoter_ids, ]
+          Promoter[Promoter$gene_id %in% promoter_ids,]
         return(essentials_promoter)
       }
     })
@@ -928,7 +926,7 @@ server <- function(input, output) {
     showModal(
       modalDialog(
         title = "Help",
-        "Numeric. Off-target score coefficient. Large alpha penalizes combinations with high off-target score while alpha = 0 
+        "Numeric. Off-target score coefficient. Large alpha penalizes combinations with high off-target score while alpha = 0
         ignores off-targets and picks combinations with highest on-target binding.",
         easyClose = TRUE,
         footer = NULL
@@ -949,8 +947,8 @@ server <- function(input, output) {
     showModal(
       modalDialog(
         title = "Help",
-        "Selecting the optimal set of guideRNAs for maximal on- and minimal off-targeting is not trivial. 
-        Repguide first computes the binding profiles of all possible combinations of previously selected guide representatives, 
+        "Selecting the optimal set of guideRNAs for maximal on- and minimal off-targeting is not trivial.
+        Repguide first computes the binding profiles of all possible combinations of previously selected guide representatives,
         i.e. the best guides per cluster. The best combination then serves as seed to initialize a greedy algorithm to further optimize the set.",
         easyClose = TRUE,
         footer = NULL

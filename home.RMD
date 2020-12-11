@@ -1,70 +1,41 @@
 ---
-title: "Home"
+  title: "Home"
 author: "Joschka Hey"
 date: "12/07/2020"
 output: html_document
 ---
-
-<style>
-body {
-text-align: lef;
-}
+  
+  <style>
+  body {
+    text-align: lef;
+  }
 </style>
 
 
-
 **Repguide** is an [R-package](https://tanaylab.github.io/Repguide/index.html), developed to facilitate the design of guideRNAs for CRISPR/dCAS9 targeting of repetitive DNA sequences, such as those derived from transposable elements.
-
-The web tool includes  full functionality of the Repguide R-package and allows users with no programming experiences to design their own guideRNAs.
-
-<br>
+The web-tool includes  full functionality of the Repguide R-package and allows users with no programming experiences to design their own guideRNAs.
 <br>
 
 ### Functionality
-<br>
 The basic workflow consists of exploring and selecting target sites, computing the guideRNA universe, and finding the optimal combination of guides that maximizes target-specific coverage.
-
 <br>
 
 [<img src="www/schematic.png" alt="schematic" width="80%" />](https://tanaylab.github.io/Repguide/index.html)
-
 <br>
 
+### Workflow
 Before starting with the Repguide Workflow, you can explore the different Repeat-families/classes/names in the **Repeat exploration** tab. 
 <br>
 Once you selected the **Guide design** tab, you are only three clicks away from your final guideRNA set to perform genome wide targeting of repetetive DNA sequences. For each of the three steps (1.Target exploration; 2.Guide design; 3.Guide combination), publication ready figures are generated, which will help you select the optimal options for the follwing step in the workflow. Default options for a quick guideRNA design are already selected. 
-
 <br>
 
 **Features include:** Multi-species support, Flexible genome annotation, Black- and whitelisting, Multiple sequence alignment, Promoter identification, Consensus positional targeting, Genome-wide mapping, On and off-target scoring, Combinatorial optimization (multiple guides), High-quality reports
-
-<br>
 <br>
 
-### Contributions
-<br>
-The Repguide web tool has been developed by:
-
-Division of Cancer Epigenomics, German Cancer Research Center (DKFZ) Heidelberg, Germany <br>
-
-[Cancer Epigenomics](https://www.dkfz.de/en/CanEpi/index.php)
-
-Contact: 
-[Joschka Hey](mailto:j.hey@dkfz.de)
-
+### Support
+Feel free to contact us or leave an issue at the Github repositories for the [Repguide R-package](https://github.com/tanaylab/repguide) or [web-tool](https://github.com/HeyLifeHD/Repguide_ShinyApp), in case of questions or problems regarding the workflow or application, respectively.
 <br>
 
-The Repguide R-package has been developed by:
-
-Division of Epigenomics and Evolution, Weizmann Instittute of Science (WIS), Rehovot Israel <br>
-
-[Epigenomics and Evolution](http://compgenomics.weizmann.ac.il/tanay/)
-
-Contact:
-[David Brocks](mailto:davidbrocks87@googlemail.com)
-
-<br>
-
-[<img src="www/dkfz_logo.png" alt="DKFZ Logo" width="50%" />](https://www.dkfz.de/en)
-
+### Citation
+Please cite **** within any publication that makes use of any analyses done with the Repguide R-package or web-tool.
 
