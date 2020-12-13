@@ -1,0 +1,32 @@
+---
+title: "Terms and Conditions"
+author: "Joschka Hey"
+date: "12/07/2020"
+output: html_document
+---
+
+<style>
+body {
+  text-align: left;
+}
+</style>
+
+### Legal
+Still missing!
+<br>
+### Creative Commons Licence
+Repguide is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Repguide is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+For a copy of the GNU General Public License see [here](https://www.gnu.org/licenses/).
+<br>
+### Terms and conditions
+Still missing!
+<br>

@@ -1,5 +1,5 @@
 ---
-  title: "Home"
+title: "Home"
 author: "Joschka Hey"
 date: "12/07/2020"
 output: html_document
@@ -7,7 +7,7 @@ output: html_document
   
   <style>
   body {
-    text-align: lef;
+    text-align: left;
   }
 </style>
 
@@ -20,7 +20,7 @@ The web-tool includes  full functionality of the Repguide R-package and allows u
 The basic workflow consists of exploring and selecting target sites, computing the guideRNA universe, and finding the optimal combination of guides that maximizes target-specific coverage.
 <br>
 
-[<img src="www/schematic.png" alt="schematic" width="80%" />](https://tanaylab.github.io/Repguide/index.html)
+[<img src="www/schematic.png" alt="schematic" width="100%" />](https://tanaylab.github.io/Repguide/index.html)
 <br>
 
 ### Workflow

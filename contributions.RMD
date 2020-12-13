@@ -1,5 +1,5 @@
 ---
-title: "Home"
+title: "Contributions"
 author: "Joschka Hey"
 date: "12/07/2020"
 output: html_document
@@ -7,13 +7,13 @@ output: html_document
 
 <style>
 body {
-  text-align: lef;
+  text-align: left;
 }
 </style>
 
 
-### Contributions
-**The Repguide web tool has been developed by:**
+### Contributions and Contact
+**The Repguide web-tool has been developed by:**
 
 Division of Cancer Epigenomics, German Cancer Research Center (DKFZ) Heidelberg, Germany 
 <br>

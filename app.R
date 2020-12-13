@@ -56,14 +56,14 @@ ui <- fluidPage(
         titlePanel(title = div(
           img(
             src = "logo.png",
-            height = 100,
-            width = 100
+            height = 120,
+            width = 120
           ),
-          "Repguide",
+          "About Repguide",
           align = "left"
         )),
         mainPanel(
-          fluidRow(column(8, includeMarkdown("home.Rmd")),
+          fluidRow(column(7, includeMarkdown("home.Rmd")),
                    column(1),
                    column(3, includeMarkdown(
                      "contributions.RMD"
@@ -71,13 +71,13 @@ ui <- fluidPage(
           
           offset = 2,
           br(),
-          HTML("Repguide Visitor Counter:"),
-          br(),
-          HTML(
-            "<script type='text/javascript' src='//counter.websiteout.net/js/7/8/0/0'></script>"
-          ),
-          br(),
-          awidth = 11
+          #HTML("Repguide Visitor Counter:"),
+          #br(),
+          #HTML(
+          #  "<script type='text/javascript' src='//counter.websiteout.net/js/7/8/0/0'></script>"
+          #),
+          #br(),
+          width = 11
         )
       ),
       
@@ -171,7 +171,7 @@ ui <- fluidPage(
                     "whitelist_repeats",
                     label = h5("Select whitelist repeats:"),
                     value = NULL,
-                    placeholder = "Enter repeat class ..."
+                    placeholder = "Enter repeat class..."
                   ),
                   circleButton(
                     "ques_whitelist_repeats",
@@ -429,10 +429,17 @@ ui <- fluidPage(
             )
           )
         )
-      )
+      ),
+      tabPanel(
+        "Terms and conditions",
+        #main panel
+        mainPanel(includeMarkdown("terms_conditions.RMD")))
+      
     )
   )
 )
+
+
 
 
 # Define server logic required to draw a histogram
@@ -746,7 +753,7 @@ server <- function(input, output) {
   })
   gs1 <- reactive({
     req(gs())
-    withProgress(message = "Add targets..", {
+    withProgress(message = "Add targets...", {
       message("Check: start addTargets")
       gs1_temp <- addTargets(gs(),
                              targets = input$target_repeats,
@@ -758,7 +765,7 @@ server <- function(input, output) {
   
   gs2 <- reactive({
     req(gs1())
-    withProgress(message = "Add alignments..", {
+    withProgress(message = "Add alignments...", {
       message("Check: start addAlignments")
       gs2_temp <- addAlignments(
         guideSet = gs1(),
