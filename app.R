@@ -6,7 +6,7 @@
 
 #libraries
 if (!"shinyWidgets" %in%  installed.packages())
-  install.packages(shinyWidgets)
+  install.packages("shinyWidgets")
 library(shinyWidgets)
 if (!"shinyBS" %in%  installed.packages())
   install.packages("shinyBS")
@@ -19,9 +19,7 @@ if (!"Repguide" %in%  installed.packages()) {
     install.packages("remotes")
   remotes::install_github(repo = 'tanaylab/repguide')
 }
-
 library(Repguide)
-library(shiny)
 if (!"shinycssloaders" %in%  installed.packages()) {
   if (!requireNamespace("remotes", quietFly = TRUE))
     install.packages("remotes")
@@ -34,9 +32,8 @@ library(data.table)
 if (!"devtools" %in%  installed.packages())
   install.packages("devtools")
 library(devtools)
-if (!"dplyr" %in%  installed.packages())
-  install_version("dplyr", version = "0.8.0.1", repos = "http://cran.us.r-project.org")
-install.packages("dplyr")
+#if (!"dplyr" %in%  installed.packages())
+#  install_version("dplyr", version = "0.8.0.1", repos = "http://cran.us.r-project.org")
 library(dplyr)
 if (!"shinythemes" %in%  installed.packages())
   install.packages("shinythemes")
@@ -67,10 +64,10 @@ ui <- fluidPage(
           align = "left"
         )),
         mainPanel(
-          fluidRow(column(7, includeMarkdown("home.Rmd")),
+          fluidRow(column(7, includeMarkdown("./home.Rmd")),
                    column(1),
                    column(3, includeMarkdown(
-                     "contributions.RMD"
+                     "./contributions.RMD"
                    ))),
           
           offset = 2,
@@ -223,7 +220,7 @@ ui <- fluidPage(
                 br(),
                 conditionalPanel(
                   condition = "input.action_target ==true",
-                  includeMarkdown("figure_legends/target_repeats.RMD")
+                  includeMarkdown("./figure_legends/target_repeats.RMD")
                 )
               )
             ),
@@ -352,7 +349,7 @@ ui <- fluidPage(
                 plotOutput("guides", height = "800px"),
                 br(),
                 conditionalPanel(condition = "input.action_guide ==true",
-                                 includeMarkdown("figure_legends/guides.RMD"))
+                                 includeMarkdown("./figure_legends/guides.RMD"))
               )
             ),
           ),
@@ -427,7 +424,7 @@ ui <- fluidPage(
                 br(),
                 conditionalPanel(
                   condition = "input.action_combination ==true",
-                  includeMarkdown("figure_legends/combinations.RMD")
+                  includeMarkdown("./figure_legends/combinations.RMD")
                 )
               )
             )
@@ -437,7 +434,7 @@ ui <- fluidPage(
       tabPanel(
         "Terms and conditions",
         #main panel
-        mainPanel(includeMarkdown("terms_conditions.RMD")))
+        mainPanel(includeMarkdown("./terms_conditions.RMD")))
       
     )
   )
@@ -587,16 +584,16 @@ server <- function(input, output) {
   BS_genome <- reactive({
     withProgress(message = "Load BS genome...", {
       if (!"BSgenome" %in%  installed.packages())
-        install.packages(paste0("BSgenome"))
+        install.packages("BSgenome")
       if (input$ref_genome %in% c("hg38")) {
         if (!"BSgenome.Hsapiens.UCSC.hg38" %in%  installed.packages())
-          install.packages("BSgenome.Hsapiens.UCSC.hg38")
+          BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
       } else if (input$ref_genome %in% c("hg19")) {
         if (!"BSgenome.Hsapiens.UCSC.hg19" %in%  installed.packages())
-          install.packages("BSgenome.Hsapiens.UCSC.hg19")
+          BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
       } else if (input$ref_genome %in% c("mm10")) {
         if (!"BSgenome.Mmusculus.UCSC.mm10" %in%  installed.packages())
-          install.packages("BSgenome.Mmusculus.UCSC.mm10")
+          BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
       } else{
         print("No appropriate BSgenome object found")
       }
@@ -620,13 +617,12 @@ server <- function(input, output) {
       txdb <-
         colnames(txdb_objects[, txdb_objects[4,] == input$ref_genome, drop = FALSE])
       if (!txdb %in%  installed.packages())
-        install.packages(txdb)
+        BiocManager::install(txdb)
       library(txdb, character.only = TRUE)
       txdb <- get(txdb)
       return(txdb)
     })
   })
-  
   
   #load data
   #fantom
