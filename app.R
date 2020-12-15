@@ -31,8 +31,12 @@ library(shinycssloaders)
 if (!"data.table" %in%  installed.packages())
   install.packages("data.table")
 library(data.table)
+if (!"devtools" %in%  installed.packages())
+  install.packages("devtools")
+library(devtools)
 if (!"dplyr" %in%  installed.packages())
-  install.packages("dplyr")
+  install_version("dplyr", version = "0.8.0.1", repos = "http://cran.us.r-project.org")
+install.packages("dplyr")
 library(dplyr)
 if (!"shinythemes" %in%  installed.packages())
   install.packages("shinythemes")
@@ -374,21 +378,21 @@ ui <- fluidPage(
                     size = "xs"
                   )
                 ),
-                splitLayout(
-                  cellWidths = c("95%", "5%"),
-                  sliderInput(
-                    "iterations",
-                    label = h5("Number of greedy search iterations:"),
-                    min = 0,
-                    max = 50,
-                    value = 10
-                  ),
-                  circleButton(
-                    "ques_iterations",
-                    icon = icon("question-circle"),
-                    size = "xs"
-                  )
-                ),
+                # splitLayout(
+                #   cellWidths = c("95%", "5%"),
+                #   sliderInput(
+                #     "iterations_gs",
+                #     label = h5("Number of greedy search iterations:"),
+                #     min = 0,
+                #     max = 50,
+                #     value = 10
+                #   ),
+                #   circleButton(
+                #     "ques_iterations",
+                #     icon = icon("question-circle"),
+                #     size = "xs"
+                #   )
+                # ),
                 splitLayout(
                   cellWidths = c("95%", "5%"),
                   sliderInput(
@@ -967,12 +971,13 @@ server <- function(input, output) {
   #calculate guide combinations
   gs4 <-  eventReactive(input$action_combination, {
     req(gs3())
+    #browser()
     withProgress(message = "Add guide combinations...", {
       message("Check: start addCombinations")
       gs4_temp <- addCombinations(
         gs3(),
         # our guideSet
-        iterations = input$iterations,
+        #iterations = 10,
         # number of greedy search iterations
         greedy = TRUE,
         # run greedy algorithm
