@@ -64,10 +64,10 @@ ui <- fluidPage(
           align = "left"
         )),
         mainPanel(
-          fluidRow(column(7, includeMarkdown("./home.Rmd")),
+          fluidRow(column(7, includeMarkdown("home.RMD")),
                    column(1),
                    column(3, includeMarkdown(
-                     "./contributions.RMD"
+                     "contributions.RMD"
                    ))),
           
           offset = 2,
@@ -220,7 +220,7 @@ ui <- fluidPage(
                 br(),
                 conditionalPanel(
                   condition = "input.action_target ==true",
-                  includeMarkdown("./figure_legends/target_repeats.RMD")
+                  includeMarkdown("figure_legends/target_repeats.RMD")
                 )
               )
             ),
@@ -349,7 +349,7 @@ ui <- fluidPage(
                 plotOutput("guides", height = "800px"),
                 br(),
                 conditionalPanel(condition = "input.action_guide ==true",
-                                 includeMarkdown("./figure_legends/guides.RMD"))
+                                 includeMarkdown("figure_legends/guides.RMD"))
               )
             ),
           ),
@@ -424,7 +424,7 @@ ui <- fluidPage(
                 br(),
                 conditionalPanel(
                   condition = "input.action_combination ==true",
-                  includeMarkdown("./figure_legends/combinations.RMD")
+                  includeMarkdown("figure_legends/combinations.RMD")
                 )
               )
             )
@@ -434,7 +434,7 @@ ui <- fluidPage(
       tabPanel(
         "Terms and conditions",
         #main panel
-        mainPanel(includeMarkdown("./terms_conditions.RMD")))
+        mainPanel(includeMarkdown("terms_conditions.RMD")))
       
     )
   )
